@@ -1,0 +1,6 @@
+".\Objects\main.obj",
+".\Objects\Timer0.obj",
+".\Objects\delay.obj",
+".\Objects\lcd1602.obj" 
+TO ".\Objects\项目5-定时器" 
+PRINT(".\Listings\项目5-定时器.m51") RAMSIZE(256) 

@@ -1,0 +1,75 @@
+C51 COMPILER V9.54   MAIN                                                                  10/27/2025 19:53:56 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\L
+                    -istings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <INTRINS.H> //标准变量库
+   3          
+   4          //这是一个电子时钟的案例
+   5          
+   6          #include <TIMER0.H>
+   7          #include <LCD1602.H>
+   8          #include <DELAY.H>
+   9          
+  10          //定义时分秒的变量
+  11          unsigned char h=19,m=21,s,ms;
+  12          
+  13          void Timer0_Routine() interrupt 1
+  14          {
+  15   1        static  unsigned int T0Count;
+  16   1        TL0 = 0x18;   //设置定时初值
+  17   1        TH0 = 0xFC;   //设置定时初值
+  18   1        T0Count++;
+  19   1        if(T0Count>=91) //这里应该设置100毫秒的，但是考虑到中断函数执行时间，所以定为
+             -91毫秒，加上程序执行时间正好100毫秒
+  20   1        {
+  21   2          ms++;
+  22   2          if(ms>=10){s++;ms=0;}
+  23   2          if(s>=60){m++;s=0;}
+  24   2          if(m>=60){h++;m=0;}
+  25   2          if(h>=24){h=0;}
+  26   2          
+  27   2          T0Count=0;
+  28   2        }
+  29   1        
+  30   1      }
+  31          
+  32          
+  33          void main(){
+  34   1        Timer0Init();
+  35   1        LCD_Init();
+  36   1        
+  37   1        LCD_ShowString(1,1,"Time-c       ^_^");
+  38   1        LCD_ShowString(2,1,"  :  :  .");
+  39   1        while(1){
+  40   2          LCD_ShowNum(2,1,h,2);
+  41   2          LCD_ShowNum(2,4,m,2);
+  42   2          LCD_ShowNum(2,7,s,2);
+  43   2          LCD_ShowNum(2,10,ms,1);
+  44   2        }
+  45   1      }
+  46          
+  47          
+  48          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    179    ----
+   CONSTANT SIZE    =     27    ----
+C51 COMPILER V9.54   MAIN                                                                  10/27/2025 19:53:56 PAGE 2   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

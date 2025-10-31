@@ -1,0 +1,5 @@
+".\Objects\main.obj",
+".\Objects\4x4_16.obj",
+".\Objects\888led.obj" 
+TO ".\Objects\¿Î³Ì" 
+PRINT(".\Listings\¿Î³Ì.m51") RAMSIZE(256) 

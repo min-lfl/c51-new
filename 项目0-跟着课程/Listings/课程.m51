@@ -1,0 +1,246 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        10/21/2025  11:12:19  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+E:\KEIL5 C51\KEIL5 C51\C51\BIN\BL51.EXE .\Objects\main.obj, .\Objects\4x4_16.obj, .\Objects\888led.obj TO .\Objects\课程
+>>  PRINT (.\Listings\课程.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  .\Objects\4x4_16.obj (4X4_16)
+  .\Objects\888led.obj (888LED)
+  E:\KEIL5 C51\KEIL5 C51\C51\LIB\C51S.LIB (?C_STARTUP)
+  E:\KEIL5 C51\KEIL5 C51\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\课程 (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0002H     UNIT         ?DT?MAIN
+            DATA    000AH     0001H     UNIT         _DATA_GROUP_
+            IDATA   000BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     07FDH                  *** GAP ***
+            CODE    0800H     008CH     UNIT         ?C_C51STARTUP
+            CODE    088CH     006AH     UNIT         ?PR?_NIXIE?888LED
+            CODE    08F6H     0058H     UNIT         ?PR?MAIN?MAIN
+            CODE    094EH     004EH     UNIT         ?PR?BUTTON?4X4_16
+            CODE    099CH     0012H     UNIT         ?PR?UBIT3?MAIN
+            CODE    09AEH     000EH     UNIT         ?PR?UBIT1?MAIN
+            CODE    09BCH     000EH     UNIT         ?PR?UBIT2?MAIN
+            CODE    09CAH     000BH     UNIT         ?PR?_DELAY?MAIN
+            CODE    09D5H     000AH     UNIT         ?CO?888LED
+            CODE    09DFH     0004H     UNIT         ?C_INITSEG
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\课程 (MAIN)
+
+
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN                  -----    -----
+  +--> ?PR?BUTTON?4X4_16
+  +--> ?PR?UBIT1?MAIN
+  +--> ?PR?UBIT2?MAIN
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/21/2025  11:12:19  PAGE 2
+
+
+  +--> ?PR?UBIT3?MAIN
+
+?PR?BUTTON?4X4_16              000AH    0001H
+  +--> ?PR?_DELAY?MAIN
+
+?PR?UBIT1?MAIN                 -----    -----
+  +--> ?PR?_DELAY?MAIN
+
+?PR?UBIT2?MAIN                 -----    -----
+  +--> ?PR?_DELAY?MAIN
+
+?PR?UBIT3?MAIN                 -----    -----
+  +--> ?PR?_DELAY?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\课程 (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:09CAH         PUBLIC        _delay
+  B:00A0H.0       PUBLIC        P2_0
+  B:00A0H.1       PUBLIC        P2_1
+  C:08F6H         PUBLIC        main
+  D:0008H         PUBLIC        ubit
+  D:0009H         PUBLIC        num
+  C:09AEH         PUBLIC        ubit1
+  C:09BCH         PUBLIC        ubit2
+  C:099CH         PUBLIC        ubit3
+  -------         PROC          _DELAY
+  D:0007H         SYMBOL        xms
+  -------         DO            
+  D:0006H         SYMBOL        i
+  D:0005H         SYMBOL        j
+  -------         ENDDO         
+  C:09CAH         LINE#         7
+  C:09CAH         LINE#         9
+  C:09CCH         LINE#         10
+  C:09CEH         LINE#         11
+  C:09CEH         LINE#         12
+  C:09CEH         LINE#         13
+  C:09D0H         LINE#         14
+  C:09D2H         LINE#         15
+  C:09D4H         LINE#         16
+  -------         ENDPROC       _DELAY
+  -------         PROC          UBIT1
+  C:09AEH         LINE#         19
+  C:09AEH         LINE#         20
+  C:09B0H         LINE#         21
+  C:09B5H         LINE#         22
+  C:09B7H         LINE#         23
+  -------         ENDPROC       UBIT1
+  -------         PROC          UBIT2
+  C:09BCH         LINE#         26
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/21/2025  11:12:19  PAGE 3
+
+
+  C:09BCH         LINE#         27
+  C:09BEH         LINE#         28
+  C:09C3H         LINE#         29
+  C:09C5H         LINE#         30
+  -------         ENDPROC       UBIT2
+  -------         PROC          UBIT3
+  C:099CH         LINE#         33
+  C:099CH         LINE#         34
+  C:09A0H         LINE#         35
+  C:09A5H         LINE#         36
+  C:09A9H         LINE#         37
+  -------         ENDPROC       UBIT3
+  -------         PROC          MAIN
+  C:08F6H         LINE#         41
+  C:08F6H         LINE#         42
+  C:08F6H         LINE#         43
+  C:08F6H         LINE#         44
+  C:08FBH         LINE#         45
+  C:08FFH         LINE#         46
+  C:090AH         LINE#         47
+  C:090AH         LINE#         48
+  C:090AH         LINE#         49
+  C:0911H         LINE#         50
+  C:0914H         LINE#         51
+  C:0916H         LINE#         52
+  C:0916H         LINE#         53
+  C:091DH         LINE#         54
+  C:0920H         LINE#         55
+  C:0922H         LINE#         56
+  C:0922H         LINE#         57
+  C:092CH         LINE#         58
+  C:092FH         LINE#         59
+  C:092FH         LINE#         60
+  C:092FH         LINE#         61
+  C:092FH         LINE#         63
+  C:0934H         LINE#         64
+  C:0937H         LINE#         65
+  C:0939H         LINE#         66
+  C:0939H         LINE#         67
+  C:093EH         LINE#         68
+  C:0941H         LINE#         69
+  C:0943H         LINE#         70
+  C:0943H         LINE#         71
+  C:0949H         LINE#         72
+  C:094CH         LINE#         73
+  C:094CH         LINE#         74
+  C:094CH         LINE#         75
+  C:094CH         LINE#         76
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        4X4_16
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  B:0090H.1       PUBLIC        P1_1
+  B:0090H.2       PUBLIC        P1_2
+  B:0090H.3       PUBLIC        P1_3
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/21/2025  11:12:19  PAGE 4
+
+
+  B:0090H.7       PUBLIC        P1_7
+  C:094EH         PUBLIC        button
+  -------         PROC          BUTTON
+  -------         DO            
+  D:000AH         SYMBOL        KeyNumber
+  -------         ENDDO         
+  C:094EH         LINE#         7
+  C:094EH         LINE#         8
+  C:0951H         LINE#         9
+  C:0954H         LINE#         10
+  C:0956H         LINE#         11
+  C:0969H         LINE#         14
+  C:096CH         LINE#         15
+  C:096EH         LINE#         16
+  C:0981H         LINE#         18
+  C:0984H         LINE#         19
+  C:0986H         LINE#         20
+  C:0999H         LINE#         23
+  C:099BH         LINE#         24
+  -------         ENDPROC       BUTTON
+  -------         ENDMOD        4X4_16
+
+  -------         MODULE        888LED
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:088CH         PUBLIC        _Nixie
+  D:0080H         PUBLIC        P0
+  B:00A0H.2       PUBLIC        P2_2
+  B:00A0H.3       PUBLIC        P2_3
+  B:00A0H.4       PUBLIC        P2_4
+  C:09D5H         PUBLIC        leddata
+  -------         PROC          _NIXIE
+  D:0007H         SYMBOL        Location
+  D:0004H         SYMBOL        Number
+  C:088CH         LINE#         7
+  C:088CH         LINE#         8
+  C:08B9H         LINE#         9
+  C:08B9H         LINE#         10
+  C:08BDH         LINE#         11
+  C:08C5H         LINE#         12
+  C:08C9H         LINE#         13
+  C:08D1H         LINE#         14
+  C:08D5H         LINE#         15
+  C:08DDH         LINE#         16
+  C:08E1H         LINE#         17
+  C:08E7H         LINE#         18
+  C:08E7H         LINE#         19
+  C:08F5H         LINE#         20
+  -------         ENDPROC       _NIXIE
+  -------         ENDMOD        888LED
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_NIXIE?888LED
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0156H BYTE (16%) *
+******************************************************************************
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      10/21/2025  11:12:19  PAGE 5
+
+
+Program Size: data=12.0 xdata=0 code=486
+LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)

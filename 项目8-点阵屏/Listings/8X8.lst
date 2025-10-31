@@ -1,0 +1,94 @@
+C51 COMPILER V9.54   8X8                                                                   10/30/2025 21:03:02 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE 8X8
+OBJECT MODULE PLACED IN .\Objects\8X8.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE 8X8.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Li
+                    -stings\8X8.lst) TABS(2) OBJECT(.\Objects\8X8.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <DELAY.H>
+   3          
+   4          sbit SER=P3^4; //数据暂放区
+   5          sbit SCK=P3^6;  //上升沿移位
+   6          sbit RCK=P3^5;  //上升沿输出
+   7          
+   8          /**
+   9            * @brief    74HC595芯片驱动程序，输入一个字节，会把字节输出到纵坐标上，类比P0=0
+             -xaa;语句的作用
+  10            * @param    要输出到纵坐标上的字节
+  11            * @retval   无
+  12            */
+  13          void _74HC595_WriteByte(unsigned char Byte){
+  14   1        unsigned char i;
+  15   1        for(i=0;i<8;i++){
+  16   2          SER=Byte&(0x80>>i);
+  17   2          SCK=0;SCK=1;//控制SCK输出一个信号上升沿
+  18   2        }
+  19   1        RCK=0;RCK=1;  //控制RCK输出一个信号上升沿
+  20   1      }
+  21          
+  22          /**
+  23            * @brief    接受第几列和一个字节，会在那一列上显示字节图像1为亮0为灭，此函数
+             -要在主函数内快速扫描
+  24            * @param1   第几列
+  25            * @param2   要显示的字节
+  26            * @retval   无返回值
+  27            */
+  28          void MatrixLED_ShowColumn(unsigned char num,unsigned char date){
+  29   1      
+  30   1        _74HC595_WriteByte(date);//给纵坐标一个输入，当列被选中，横坐标位置为1时，灯亮�
+             -�
+  31   1        P0=~(0x80>>num); //给横坐标一个输入选中哪一列
+  32   1        delay(1);
+  33   1        P0=0xff; //消除残影
+  34   1      }
+  35          
+  36          
+  37          /**
+  38            * @brief    这个是一个快速实现8x8动态显示的封装函数
+  39            * @param1   接受一个数组变量，数组内容可以用取模器直接生成，列扫描
+  40            * @param2   接受一个数组长度，必须诚实填写数组的长度
+  41            * @param3   接受一个1~500的参数，控制字幕速度，速度值越小越快,小于<50>时为流�
+             -��显示，大于<50>时为翻页逐帧显示，等于<0>时为静态显示，8个数组为1帧
+  42            * @retval   无返回值
+  43            */
+  44          void MatrixLED_Roll(unsigned char arr[],unsigned int len,unsigned char speed){
+  45   1        unsigned char i, add;           // 普通局部变量
+  46   1        static unsigned char a = 0;      // 静态变量：保持滚动位置
+  47   1        static unsigned char num = 0;    // 静态变量：保持计数状态
+  48   1        if(speed>=50){add=8;}else{if(speed==0){add=0;}else{add=1;}} //判断要滚动还是翻页还是静态
+  49   1        for(i=0;i<8;i++){  //刷新一次屏幕
+  50   2          MatrixLED_ShowColumn(i,arr[(a+i)%len]);
+C51 COMPILER V9.54   8X8                                                                   10/30/2025 21:03:02 PAGE 2   
+
+  51   2        }
+  52   1        num++;
+  53   1        if(num>=speed){
+  54   2          a+=add;
+  55   2          num=0;
+  56   2          if(a>=(len)){
+  57   3            a=0;
+  58   3          }
+  59   2        }
+  60   1      }
+  61            
+  62          
+  63          
+  64          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    190    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,104 @@
+C51 COMPILER V9.54   MAIN                                                                  10/21/2025 11:12:19 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\L
+                    -istings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <INTRINS.H> //标准变量库
+   3          
+   4          #include <4x4_16.H>
+   5          
+   6          //标准的循环延迟（精确1ms）
+   7          void delay(unsigned char xms){
+   8   1        unsigned char i, j;
+   9   1        i = 2;
+  10   1        j = 239;
+  11   1        do{
+  12   2        do{
+  13   3          while (--j);
+  14   3        } while (--i);
+  15   2        } while (--xms);
+  16   1      }
+  17          
+  18          
+  19          void ubit1(){
+  20   1        P2_0=0;
+  21   1        delay(3);
+  22   1        P2_0=1;
+  23   1        delay(3);
+  24   1      }
+  25          
+  26          void ubit2(){
+  27   1        P2_1=0;
+  28   1        delay(3);
+  29   1        P2_1=1;
+  30   1        delay(3);
+  31   1      }
+  32          
+  33          void ubit3(){
+  34   1        P2_0=0;P2_1=0;
+  35   1        delay(3);
+  36   1        P2_0=1;P2_1=1;
+  37   1        delay(3);
+  38   1      }
+  39          
+  40          char num,ubit=0;
+  41          void main()
+  42          {
+  43   1        while(1){
+  44   2          num=button();
+  45   2          if(num!=0){
+  46   3            switch(num)
+  47   3            {
+  48   4              case 1: 
+  49   4                if(ubit==1){ubit=0;break;}
+  50   4                ubit=1; 
+  51   4              break;
+  52   4              case 2:
+  53   4                if(ubit==2){ubit=0;break;}
+  54   4                ubit=2; 
+C51 COMPILER V9.54   MAIN                                                                  10/21/2025 11:12:19 PAGE 2   
+
+  55   4              break;
+  56   4              case 3:
+  57   4                if(ubit==3){ubit=0;break;}
+  58   4                ubit=3;
+  59   4              break;
+  60   4            }
+  61   3          }
+  62   2      
+  63   2          if(ubit==1){
+  64   3            ubit1();
+  65   3          }
+  66   2          else{
+  67   3          if(ubit==2){
+  68   4            ubit2();
+  69   4          }
+  70   3          else{
+  71   4          if(ubit==3){
+  72   5            ubit3();
+  73   5            }
+  74   4          }
+  75   3          }
+  76   2        }
+  77   1      }
+  78          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    145    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

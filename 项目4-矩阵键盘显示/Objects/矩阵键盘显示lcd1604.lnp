@@ -1,0 +1,7 @@
+".\Objects\main.obj",
+".\Objects\888led.obj",
+".\Objects\delay.obj",
+".\Objects\lcd1602.obj",
+".\Objects\4x4_16.obj" 
+TO ".\Objects\¾ØÕó¼üÅÌÏÔÊ¾lcd1604" 
+PRINT(".\Listings\¾ØÕó¼üÅÌÏÔÊ¾lcd1604.m51") RAMSIZE(256) 
