@@ -4,9 +4,26 @@
 #include <LCD1602.H>
 #include <DELAY.H>
 
-sbit DS1302_IO=P3^4;
-sbit DS1302_CE=P3^5;
-sbit DS1302_SCLK=P3^6;
+#include <DS1302_time.H>
+
+
+void  main(){
+	unsigned char time;
+	LCD_Init();
+	while(1){
+		time=0;
+		time=read_DS1302(0x81);
+		LCD_ShowNum(1,9,(time/16*10+time%16),2); //bcd代码转10进制输出
+	}
+}
+
+
+
+
+
+
+
+
 
 ////写入时间
 //void write_DS1302(){
@@ -31,49 +48,3 @@ sbit DS1302_SCLK=P3^6;
 //	DS1302_IO=1;DS1302_SCLK=1;DS1302_SCLK=0;delay(30); //1
 //	DS1302_CE=0;
 //}
-
-
-
-//读出时间
-unsigned char read_DS1302(){
-	unsigned char time=0;
-	DS1302_IO=0;
-	time=0;
-	DS1302_SCLK=0;
-	DS1302_CE=1;
-	DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //8
-	DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //7
-	DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //6
-	DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //5
-	DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
-	DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
-	DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
-	DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //1
-	
-	DS1302_SCLK=0;DS1302_SCLK=1;
-	if(DS1302_IO){time+=1;}DS1302_SCLK=0;DS1302_SCLK=1; //8
-	if(DS1302_IO){time+=2;}DS1302_SCLK=0;DS1302_SCLK=1; //7
-	if(DS1302_IO){time+=4;}DS1302_SCLK=0;DS1302_SCLK=1; //6
-	if(DS1302_IO){time+=8;}DS1302_SCLK=0;DS1302_SCLK=1; //5
-	if(DS1302_IO){time+=16;}DS1302_SCLK=0;DS1302_SCLK=1; //4
-	if(DS1302_IO){time+=32;}DS1302_SCLK=0;DS1302_SCLK=1; //3
-	if(DS1302_IO){time+=64;}DS1302_SCLK=0;DS1302_SCLK=1; //2
-	if(DS1302_IO){time+=128;} //1
-	DS1302_CE=0;
-	DS1302_IO=0;
-	return time;
-}
-
-
-unsigned char time;
-
-void  main(){
-	LCD_Init();
-//	write_DS1302();
-	while(1){
-		time=0;
-		time=read_DS1302();
-		LCD_ShowNum(1,9,(time/16*10+time%16),2);
-//		delay(1000);
-	}
-}
