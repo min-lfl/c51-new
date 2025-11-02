@@ -97,6 +97,21 @@ git remote remove origin 删除绑定链接
 这三条是用https协议的方法，由于不稳定已经弃用，用上面提到的ssh协议就好
 
 ————————————————————————————————
+# 2. 从 "干净" 的提交创建一个新分支
+git branch feature_v2 c1efaa2
+
+# 3. 切换到新分支开始重新实现
+git checkout feature_v2
+# ... 重新编写代码 ...
+
+# 4. 提交新的实现
+git add .
+git commit -m "重新实现功能，这次更好"
+
+# 5. 主分支 (master) 保持不变，仍然包含 e315432
+git checkout master
+git log
+
 
 ```
 
