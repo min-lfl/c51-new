@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   DS1302_TIME                                                           11/02/2025 20:42:44 PAGE 1   
+C51 COMPILER V9.54   DS1302_TIME                                                           11/02/2025 21:18:02 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE DS1302_TIME
@@ -15,33 +15,91 @@ line level    source
    5          sbit DS1302_SCLK=P3^6;
    6          
    7          
-   8          
-   9          
-  10          //读出时间
-  11          unsigned char read_DS1302(unsigned char Byte){
-  12   1        unsigned char i,time=0;
-  13   1        DS1302_IO=0;DS1302_SCLK=0;  //初始化I/O口，避免前面程序对读取函数的影响
-  14   1        
-  15   1        //像ds1302发送一段数据表明要读取哪些
-  16   1        DS1302_CE=1;
-  17   1        for(i=0;i<8;i++){
-  18   2          DS1302_IO=Byte&(0x01<<i);
-  19   2          DS1302_SCLK=0;DS1302_SCLK=1;
-  20   2        }
-  21   1        
-  22   1        //开始读取
-  23   1        for(i=0;i<8;i++){
-  24   2          DS1302_SCLK=1;DS1302_SCLK=0;
-  25   2          if(DS1302_IO){time|=0x01<<i;}
-  26   2        }
-  27   1        
-  28   1        DS1302_CE=0;DS1302_IO=0;//完成一次读取循环后把用到的接口复位
-  29   1        return time;
-  30   1      }
+   8          //关闭写保护（写入0x8E和0x00）
+   9          void init_DS1302(){
+  10   1        DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
+  11   1        
+  12   1        DS1302_CE=1;
+  13   1        
+  14   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
+  15   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //7
+  16   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //6
+  17   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //5
+  18   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
+  19   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
+  20   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
+  21   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //1
+  22   1        
+  23   1        
+  24   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
+  25   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //7
+  26   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //6
+  27   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //5
+  28   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
+  29   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
+  30   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
+  31   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //1
+  32   1        
+  33   1        DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
+  34   1      }
+  35          
+  36          //写入时间
+  37          void write_DS1302(){
+  38   1        DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
+  39   1        
+  40   1        DS1302_CE=1;
+  41   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
+  42   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //7
+  43   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //6
+  44   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //5
+  45   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
+  46   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
+  47   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
+  48   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //1
+  49   1        
+  50   1        
+  51   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
+  52   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //7
+  53   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //6
+  54   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //5
+C51 COMPILER V9.54   DS1302_TIME                                                           11/02/2025 21:18:02 PAGE 2   
+
+  55   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //4
+  56   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
+  57   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //2
+  58   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //1
+  59   1        
+  60   1        DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
+  61   1      }
+  62          
+  63          
+  64          
+  65          
+  66          //读出时间
+  67          unsigned char read_DS1302(unsigned char Byte){
+  68   1        unsigned char i,time=0;
+  69   1        DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;  //初始化I/O口，避免前面程序对读取函数的影响
+  70   1        
+  71   1        //像ds1302发送一段数据表明要读取哪些
+  72   1        DS1302_CE=1;
+  73   1        for(i=0;i<8;i++){
+  74   2          DS1302_IO=Byte&(0x01<<i);
+  75   2          DS1302_SCLK=0;DS1302_SCLK=1;
+  76   2        }
+  77   1        
+  78   1        //开始读取
+  79   1        for(i=0;i<8;i++){
+  80   2          DS1302_SCLK=1;DS1302_SCLK=0;
+  81   2          if(DS1302_IO){time|=0x01<<i;}
+  82   2        }
+  83   1        
+  84   1        DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;//完成一次读取循环后把用到的接口复位
+  85   1        return time;
+  86   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     79    ----
+   CODE SIZE        =    305    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
