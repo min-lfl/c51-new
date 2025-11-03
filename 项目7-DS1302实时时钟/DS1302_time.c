@@ -10,7 +10,7 @@ void init_DS1302(){
 	DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
 }
 
-//写入时间
+//写入数据（初步封装）
 void write_DS1302(unsigned char Byte,unsigned char time){
 	unsigned char i,time_bcd;
 	time_bcd=(time/10*16)+time%10;//转化bcd格式
@@ -32,7 +32,7 @@ void write_DS1302(unsigned char Byte,unsigned char time){
 }
 
 
-//读出时间
+//读出数据（初步封装）
 unsigned char read_DS1302(unsigned char Byte){
 	unsigned char i,time=0;
 	init_DS1302();//初始化复位寄存器
@@ -51,8 +51,51 @@ unsigned char read_DS1302(unsigned char Byte){
 	}
 	
 	init_DS1302();//初始化复位寄存器
-	return time;
+	return time=time/16*10+time%16;
 }
+
+
+//写入时间和读出时间一个函数搞定
+unsigned char write_and_read_DS1302(unsigned char code1,unsigned char num){
+	unsigned char where;
+	
+	//判断是不是要对读保护和写保护操作
+	if(code1==0x8e){write_DS1302(code1,num);return 88;}
+	if(code1==0x8f){return read_DS1302(code1);}
+	
+	if(code1>6){return 66;}
+	
+	if(num<=99){//判断是要读还是写，小于等于99是写，大于99是读
+		where=0x80+(code1*2);
+		write_DS1302(where,num);
+		return 1;
+	}
+	else{
+		where=0x80+(code1*2)+1;
+		return read_DS1302(where);
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

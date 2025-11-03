@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/03/2025 21:05:29 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/03/2025 21:57:09 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -19,20 +19,25 @@ line level    source
    9          
   10          void  main(){
   11   1        unsigned char time;
-  12   1        init_DS1302();
-  13   1        write_DS1302(0x82,58);
-  14   1        LCD_Init();
-  15   1        while(1){
-  16   2          time=read_DS1302(0x83);
-  17   2          LCD_ShowNum(1,9,(time/16*10+time%16),2); //bcd代码转10进制输出
-  18   2        }
-  19   1      }
-  20          
+  12   1        LCD_Init();
+  13   1        LCD_ShowString(2,3,":  :");
+  14   1        
+  15   1        write_and_read_DS1302(2,0);
+  16   1        while(1){
+  17   2          time=write_and_read_DS1302(2,0xff);
+  18   2          LCD_ShowNum(2,1,time,2);
+  19   2          time=write_and_read_DS1302(1,0xff);
+  20   2          LCD_ShowNum(2,4,time,2);
+  21   2          time=write_and_read_DS1302(0,0xff);
+  22   2          LCD_ShowNum(2,7,time,2);
+  23   2        }
+  24   1      }
+  25          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     54    ----
-   CONSTANT SIZE    =   ----    ----
+   CODE SIZE        =     94    ----
+   CONSTANT SIZE    =      5    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----       1

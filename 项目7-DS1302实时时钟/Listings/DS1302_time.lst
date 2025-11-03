@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   DS1302_TIME                                                           11/03/2025 21:05:29 PAGE 1   
+C51 COMPILER V9.54   DS1302_TIME                                                           11/03/2025 21:57:09 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE DS1302_TIME
@@ -20,7 +20,7 @@ line level    source
   10   1        DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
   11   1      }
   12          
-  13          //写入时间
+  13          //写入数据（初步封装）
   14          void write_DS1302(unsigned char Byte,unsigned char time){
   15   1        unsigned char i,time_bcd;
   16   1        time_bcd=(time/10*16)+time%10;//转化bcd格式
@@ -42,7 +42,7 @@ line level    source
   32   1      }
   33          
   34          
-  35          //读出时间
+  35          //读出数据（初步封装）
   36          unsigned char read_DS1302(unsigned char Byte){
   37   1        unsigned char i,time=0;
   38   1        init_DS1302();//初始化复位寄存器
@@ -61,46 +61,91 @@ line level    source
   51   2        }
   52   1        
   53   1        init_DS1302();//初始化复位寄存器
-  54   1        return time;
-C51 COMPILER V9.54   DS1302_TIME                                                           11/03/2025 21:05:29 PAGE 2   
+  54   1        return time=time/16*10+time%16;
+C51 COMPILER V9.54   DS1302_TIME                                                           11/03/2025 21:57:09 PAGE 2   
 
   55   1      }
   56          
   57          
-  58          
-  59          
-  60          
-  61          //  DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
-  62          //  
-  63          //  DS1302_CE=1;
-  64          //  
-  65          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
-  66          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //7
-  67          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //6
-  68          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //5
-  69          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
-  70          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
-  71          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
-  72          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //1
-  73          //  
-  74          //  
-  75          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
-  76          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //7
-  77          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //6
-  78          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //5
-  79          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
-  80          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
-  81          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
-  82          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //1
-  83          //  
+  58          //写入时间和读出时间一个函数搞定
+  59          unsigned char write_and_read_DS1302(unsigned char code1,unsigned char num){
+  60   1        unsigned char where;
+  61   1        
+  62   1        //判断是不是要对读保护和写保护操作
+  63   1        if(code1==0x8e){write_DS1302(code1,num);return 88;}
+  64   1        if(code1==0x8f){return read_DS1302(code1);}
+  65   1        
+  66   1        if(code1>6){return 66;}
+  67   1        
+  68   1        if(num<=99){//判断是要读还是写，小于等于99是写，大于99是读
+  69   2          where=0x80+(code1*2);
+  70   2          write_DS1302(where,num);
+  71   2          return 1;
+  72   2        }
+  73   1        else{
+  74   2          where=0x80+(code1*2)+1;
+  75   2          return read_DS1302(where);
+  76   2        }
+  77   1        return 0;
+  78   1      }
+  79          
+  80          
+  81          
+  82          
+  83          
+  84          
+  85          
+  86          
+  87          
+  88          
+  89          
+  90          
+  91          
+  92          
+  93          
+  94          
+  95          
+  96          
+  97          
+  98          
+  99          
+ 100          
+ 101          
+ 102          
+ 103          
+ 104          //  DS1302_CE=0;DS1302_IO=0;DS1302_SCLK=0;
+ 105          //  
+ 106          //  DS1302_CE=1;
+ 107          //  
+ 108          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
+ 109          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //7
+ 110          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //6
+ 111          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //5
+ 112          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
+ 113          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
+ 114          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
+ 115          //  DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //1
+ 116          //  
+C51 COMPILER V9.54   DS1302_TIME                                                           11/03/2025 21:57:09 PAGE 3   
+
+ 117          //  
+ 118          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //8
+ 119          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //7
+ 120          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //6
+ 121          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //5
+ 122          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //4
+ 123          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
+ 124          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //2
+ 125          //  DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //1
+ 126          //  
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    184    ----
+   CODE SIZE        =    249    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----    ----
+   DATA SIZE        =   ----       1
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
