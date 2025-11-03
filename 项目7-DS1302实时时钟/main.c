@@ -10,7 +10,7 @@
 void  main(){
 	unsigned char time;
 	init_DS1302();
-	write_DS1302();
+	write_DS1302(0x82,58);
 	LCD_Init();
 	while(1){
 		time=read_DS1302(0x83);
@@ -18,6 +18,3 @@ void  main(){
 	}
 }
 
-
-
-//50=0101 0000
