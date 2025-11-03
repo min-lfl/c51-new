@@ -368,21 +368,6 @@
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
             </File>
-            <File>
-              <FileName>4x4_16.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\4x4_16.c</FilePath>
-            </File>
-            <File>
-              <FileName>4x4_16.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\4x4_16.h</FilePath>
-            </File>
-            <File>
-              <FileName>888led.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\888led.c</FilePath>
-            </File>
           </Files>
         </Group>
       </Groups>

@@ -9,11 +9,10 @@
 
 void  main(){
 	unsigned char time;
+	init_DS1302();
+	write_DS1302();
 	LCD_Init();
 	while(1){
-		time=0;
-		init_DS1302();
-		write_DS1302();
 		time=read_DS1302(0x83);
 		LCD_ShowNum(1,9,(time/16*10+time%16),2); //bcd代码转10进制输出
 	}

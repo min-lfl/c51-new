@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  10/21/2025 11:12:19 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/03/2025 20:43:15 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -11,91 +11,79 @@ line level    source
    1          #include <REGX52.H> //c52库
    2          #include <INTRINS.H> //标准变量库
    3          
-   4          #include <4x4_16.H>
-   5          
-   6          //标准的循环延迟（精确1ms）
-   7          void delay(unsigned char xms){
-   8   1        unsigned char i, j;
-   9   1        i = 2;
-  10   1        j = 239;
-  11   1        do{
-  12   2        do{
-  13   3          while (--j);
-  14   3        } while (--i);
-  15   2        } while (--xms);
-  16   1      }
-  17          
+   4          //定义全局变量用来存储流水灯状态
+   5          unsigned char status=0xfe;
+   6          
+   7          //标准的循环延迟（精确1ms）
+   8          void delay(unsigned char xms){
+   9   1        unsigned char i, j;
+  10   1        i = 2;
+  11   1        j = 239;
+  12   1        do{
+  13   2        do{
+  14   3          while (--j);
+  15   3        } while (--i);
+  16   2        } while (--xms);
+  17   1      }
   18          
-  19          void ubit1(){
-  20   1        P2_0=0;
-  21   1        delay(3);
-  22   1        P2_0=1;
+  19          //流水灯，函数被执行就会正流一次
+  20          void up_down(){
+  21   1        P2=status;
+  22   1        status=_crol_(status,1);
   23   1        delay(3);
   24   1      }
   25          
-  26          void ubit2(){
-  27   1        P2_1=0;
-  28   1        delay(3);
-  29   1        P2_1=1;
-  30   1        delay(3);
-  31   1      }
-  32          
-  33          void ubit3(){
-  34   1        P2_0=0;P2_1=0;
-  35   1        delay(3);
-  36   1        P2_0=1;P2_1=1;
-  37   1        delay(3);
-  38   1      }
-  39          
-  40          char num,ubit=0;
-  41          void main()
-  42          {
-  43   1        while(1){
-  44   2          num=button();
-  45   2          if(num!=0){
-  46   3            switch(num)
-  47   3            {
-  48   4              case 1: 
-  49   4                if(ubit==1){ubit=0;break;}
-  50   4                ubit=1; 
-  51   4              break;
-  52   4              case 2:
-  53   4                if(ubit==2){ubit=0;break;}
-  54   4                ubit=2; 
-C51 COMPILER V9.54   MAIN                                                                  10/21/2025 11:12:19 PAGE 2   
+  26          //倒序流水灯，函数被执行就会倒流8次
+  27          void down_up(){
+  28   1        int i;
+  29   1        for(i=0;i<8;i++){
+  30   2          P2=status;
+  31   2          status=_cror_(status,1);
+  32   2          delay(3);
+  33   2        }
+  34   1      }
+  35          
+  36          //集体亮灭，函数被执行就会亮灭5次
+  37          void Twinkle(){
+  38   1        int i;
+  39   1        for(i=0;i<5;i++){
+  40   2          P2=0x00;
+  41   2          delay(3);
+  42   2          P2=0xff;
+  43   2          delay(3);
+  44   2        }
+  45   1      }
+  46          
+  47          
+  48          void main()
+  49          {
+  50   1        EA=1;EX0=1;IT0=1;PX0=0;//中断器0的初始化，PX0=0;为优先级0
+  51   1        EA=1;EX1=1;IT1=1;PX1=1;//中断器1的初始化，PX1=1;为优先级1
+  52   1        
+  53   1        while(1){up_down();}//主循环
+  54   1      }
+C51 COMPILER V9.54   MAIN                                                                  11/03/2025 20:43:15 PAGE 2   
 
-  55   4              break;
-  56   4              case 3:
-  57   4                if(ubit==3){ubit=0;break;}
-  58   4                ubit=3;
-  59   4              break;
-  60   4            }
-  61   3          }
-  62   2      
-  63   2          if(ubit==1){
-  64   3            ubit1();
-  65   3          }
-  66   2          else{
-  67   3          if(ubit==2){
-  68   4            ubit2();
-  69   4          }
-  70   3          else{
-  71   4          if(ubit==3){
-  72   5            ubit3();
-  73   5            }
-  74   4          }
-  75   3          }
-  76   2        }
-  77   1      }
-  78          
+  55          
+  56          //中断0
+  57          void int0() interrupt 0
+  58          {
+  59   1        Twinkle();
+  60   1      }
+  61          
+  62          //中断1
+  63          void int1() interrupt 2
+  64          {
+  65   1        down_up();
+  66   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    145    ----
+   CODE SIZE        =    194    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      2    ----
+   DATA SIZE        =      1    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

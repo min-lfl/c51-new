@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   DS1302_TIME                                                           11/02/2025 21:18:02 PAGE 1   
+C51 COMPILER V9.54   DS1302_TIME                                                           11/02/2025 21:21:50 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE DS1302_TIME
@@ -62,7 +62,7 @@ line level    source
   52   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //7
   53   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //6
   54   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //5
-C51 COMPILER V9.54   DS1302_TIME                                                           11/02/2025 21:18:02 PAGE 2   
+C51 COMPILER V9.54   DS1302_TIME                                                           11/02/2025 21:21:50 PAGE 2   
 
   55   1        DS1302_IO=1;DS1302_SCLK=0;DS1302_SCLK=1; //4
   56   1        DS1302_IO=0;DS1302_SCLK=0;DS1302_SCLK=1; //3
