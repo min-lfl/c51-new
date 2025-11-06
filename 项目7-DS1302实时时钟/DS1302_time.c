@@ -13,7 +13,30 @@ void init_DS1302(){
 //写入数据（初步封装）
 void write_DS1302(unsigned char Byte,unsigned char time){
 	unsigned char i,time_bcd;
-	time_bcd=(time/10*16)+time%10;//转化bcd格式
+	//转化bcd格式
+	switch(Byte){
+		case 0x81:  //秒
+        time_bcd=(time/10*16)+time%10;
+        break;
+		case 0x83:  //分
+        time_bcd=(time/10*16)+time%10;
+        break;
+		case 0x85:  //时
+        time=time;
+        break;
+		case 0x87:  //天
+        time_bcd=(time/10*16)+time%10;
+        break;
+		case 0x89:  //月
+        time_bcd=(time/10*16)+time%10;
+        break;
+		case 0x8b:  //星期
+        time=time;
+        break;
+		case 0x8d:  //年
+        time_bcd=(time/10*16)+time%10;
+        break;
+	}
 	init_DS1302();//初始化复位寄存器
 	
 	//向ds1302发送一段数据表明要写在哪里
@@ -51,7 +74,29 @@ unsigned char read_DS1302(unsigned char Byte){
 	}
 	
 	init_DS1302();//初始化复位寄存器
-	return time=time/16*10+time%16;
+	switch(Byte){
+		case 0x81:  //秒
+        return time=time/16*10+time%16;
+        break;
+		case 0x83:  //分
+        return time=time/16*10+time%16;
+        break;
+		case 0x85:  //时
+        return time=time%32;
+        break;
+		case 0x87:  //天
+        return time=time/16*10+time%16;
+        break;
+		case 0x89:  //月
+        return time=time/16*10+time%16;
+        break;
+		case 0x8b:  //星期
+        return time=time%8;
+        break;
+		case 0x8d:  //年
+        return time=time/16*10+time%16;
+        break;
+	}
 }
 
 
@@ -59,9 +104,8 @@ unsigned char read_DS1302(unsigned char Byte){
 unsigned char write_and_read_DS1302(unsigned char code1,unsigned char num){
 	unsigned char where;
 	
-	//判断是不是要对读保护和写保护操作
-	if(code1==0x8e){write_DS1302(code1,num);return 88;}
-	if(code1==0x8f){return read_DS1302(code1);}
+	//判断是不是写保护,需不需要关闭写保护
+	if(read_DS1302(0x8f)){write_DS1302(0x8e,0x00);}
 	
 	if(code1>6){return 66;}
 	
