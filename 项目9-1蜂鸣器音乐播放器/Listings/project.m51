@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22                                                        11/06/2025  21:05:36  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22                                                        11/06/2025  22:29:19  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
@@ -33,13 +33,13 @@ LINK MAP OF MODULE:  .\Objects\project (MAIN)
                     0003H     0008H                  *** GAP ***
             CODE    000BH     0003H     ABSOLUTE     
                     000EH     07F2H                  *** GAP ***
-            CODE    0800H     008CH     UNIT         ?C_C51STARTUP
-            CODE    088CH     0055H     UNIT         ?C_INITSEG
-            CODE    08E1H     0047H     UNIT         ?PR?MAIN?MAIN
-            CODE    0928H     001DH     UNIT         ?CO?MAIN
-            CODE    0945H     0017H     UNIT         ?PR?TIMER0INIT?TIMER0
-            CODE    095CH     0015H     UNIT         ?PR?_DELAY?DELAY
-            CODE    0971H     000EH     UNIT         ?PR?TIMER0_ROUTINE?MAIN
+            CODE    0800H     00F3H     UNIT         ?CO?MAIN
+            CODE    08F3H     008CH     UNIT         ?C_C51STARTUP
+            CODE    097FH     0055H     UNIT         ?C_INITSEG
+            CODE    09D4H     0047H     UNIT         ?PR?MAIN?MAIN
+            CODE    0A1BH     0018H     UNIT         ?PR?TIMER0_ROUTINE?MAIN
+            CODE    0A33H     0017H     UNIT         ?PR?TIMER0INIT?TIMER0
+            CODE    0A4AH     0015H     UNIT         ?PR?_DELAY?DELAY
 
 
 
@@ -59,7 +59,7 @@ SEGMENT
   +--> ?PR?_DELAY?DELAY
 
 
-BL51 BANKED LINKER/LOCATER V6.22                                                      11/06/2025  21:05:36  PAGE 2
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/06/2025  22:29:19  PAGE 2
 
 
 
@@ -70,68 +70,73 @@ SYMBOL TABLE OF MODULE:  .\Objects\project (MAIN)
 
   -------         MODULE        MAIN
   C:0000H         SYMBOL        _ICE_DUMMY_
-  C:0971H         PUBLIC        Timer0_Routine
+  C:0A1BH         PUBLIC        Timer0_Routine
   D:0008H         PUBLIC        music_Index
-  C:0928H         PUBLIC        Sheet_music
+  C:0800H         PUBLIC        Sheet_music
   D:00A0H         PUBLIC        P2
   D:0009H         PUBLIC        HZ_music_Array
   B:00A0H.5       PUBLIC        music_BZ
-  C:08E1H         PUBLIC        main
+  C:09D4H         PUBLIC        main
   D:0053H         PUBLIC        music_HZ_time
   D:008CH         PUBLIC        TH0
   D:008AH         PUBLIC        TL0
   B:0088H.4       PUBLIC        TR0
   -------         PROC          MAIN
-  C:08E1H         LINE#         87
-  C:08E1H         LINE#         88
-  C:08E4H         LINE#         89
-  C:08E4H         LINE#         90
-  C:08EEH         LINE#         91
-  C:08FBH         LINE#         92
-  C:08FDH         LINE#         93
-  C:090AH         LINE#         94
-  C:090CH         LINE#         95
-  C:090EH         LINE#         96
-  C:0915H         LINE#         97
-  C:0917H         LINE#         98
-  C:0919H         LINE#         99
-  C:0919H         LINE#         100
-  C:091CH         LINE#         101
-  C:091EH         LINE#         102
-  C:0924H         LINE#         103
-  C:0926H         LINE#         104
-  C:0926H         LINE#         105
+  C:09D4H         LINE#         221
+  C:09D4H         LINE#         222
+  C:09D7H         LINE#         223
+  C:09D7H         LINE#         224
+  C:09E1H         LINE#         225
+  C:09EEH         LINE#         226
+  C:09F0H         LINE#         227
+  C:09FDH         LINE#         228
+  C:09FFH         LINE#         229
+  C:0A01H         LINE#         230
+  C:0A08H         LINE#         231
+  C:0A0AH         LINE#         232
+  C:0A0CH         LINE#         233
+  C:0A0CH         LINE#         234
+  C:0A0FH         LINE#         235
+  C:0A11H         LINE#         236
+  C:0A17H         LINE#         237
+  C:0A19H         LINE#         238
+  C:0A19H         LINE#         239
   -------         ENDPROC       MAIN
   -------         PROC          TIMER0_ROUTINE
-  C:0971H         LINE#         110
-  C:0973H         LINE#         112
-  C:0977H         LINE#         113
-  C:097AH         LINE#         114
-  C:097CH         LINE#         115
+  C:0A1BH         LINE#         244
+  C:0A1DH         LINE#         246
+  C:0A21H         LINE#         247
+  C:0A24H         LINE#         248
+  C:0A2AH         LINE#         249
+  C:0A2CH         LINE#         250
+  C:0A2EH         LINE#         251
+  C:0A2EH         LINE#         252
+  C:0A30H         LINE#         253
+  C:0A30H         LINE#         254
   -------         ENDPROC       TIMER0_ROUTINE
   -------         ENDMOD        MAIN
 
   -------         MODULE        DELAY
   C:0000H         SYMBOL        _ICE_DUMMY_
-  C:095CH         PUBLIC        _delay
+  C:0A4AH         PUBLIC        _delay
+BL51 BANKED LINKER/LOCATER V6.22                                                      11/06/2025  22:29:19  PAGE 3
+
+
   -------         PROC          _DELAY
   D:0006H         SYMBOL        xms
   -------         DO            
   D:0005H         SYMBOL        i
   D:0004H         SYMBOL        j
-BL51 BANKED LINKER/LOCATER V6.22                                                      11/06/2025  21:05:36  PAGE 3
-
-
   -------         ENDDO         
-  C:095CH         LINE#         5
-  C:095CH         LINE#         7
-  C:0966H         LINE#         8
-  C:0968H         LINE#         9
-  C:096AH         LINE#         10
-  C:096AH         LINE#         11
-  C:096CH         LINE#         12
-  C:096EH         LINE#         13
-  C:0970H         LINE#         14
+  C:0A4AH         LINE#         5
+  C:0A4AH         LINE#         7
+  C:0A54H         LINE#         8
+  C:0A56H         LINE#         9
+  C:0A58H         LINE#         10
+  C:0A58H         LINE#         11
+  C:0A5AH         LINE#         12
+  C:0A5CH         LINE#         13
+  C:0A5EH         LINE#         14
   -------         ENDPROC       _DELAY
   -------         ENDMOD        DELAY
 
@@ -141,30 +146,30 @@ SYMBOL TABLE OF MODULE:  .\Objects\project (MAIN)
   D:0089H         PUBLIC        TMOD
   B:00A8H.1       PUBLIC        ET0
   B:0088H.5       PUBLIC        TF0
-  C:0945H         PUBLIC        Timer0Init
+  C:0A33H         PUBLIC        Timer0Init
   D:008CH         PUBLIC        TH0
   D:008AH         PUBLIC        TL0
   B:00B8H.1       PUBLIC        PT0
   B:0088H.4       PUBLIC        TR0
   -------         PROC          TIMER0INIT
-  C:0945H         LINE#         5
-  C:0945H         LINE#         6
-  C:0945H         LINE#         7
-  C:0948H         LINE#         8
-  C:094BH         LINE#         9
-  C:094EH         LINE#         10
-  C:0951H         LINE#         11
-  C:0953H         LINE#         12
-  C:0955H         LINE#         13
-  C:0957H         LINE#         14
-  C:0959H         LINE#         15
-  C:095BH         LINE#         16
+  C:0A33H         LINE#         5
+  C:0A33H         LINE#         6
+  C:0A33H         LINE#         7
+  C:0A36H         LINE#         8
+  C:0A39H         LINE#         9
+  C:0A3CH         LINE#         10
+  C:0A3FH         LINE#         11
+  C:0A41H         LINE#         12
+  C:0A43H         LINE#         13
+  C:0A45H         LINE#         14
+  C:0A47H         LINE#         15
+  C:0A49H         LINE#         16
   -------         ENDPROC       TIMER0INIT
   -------         ENDMOD        TIMER0
 
 ******************************************************************************
-* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 00F5H BYTE (11%) *
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 01D5H BYTE (22%) *
 ******************************************************************************
 
-Program Size: data=86.0 xdata=0 code=389
+Program Size: data=86.0 xdata=0 code=613
 LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
