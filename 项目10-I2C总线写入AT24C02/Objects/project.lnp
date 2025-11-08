@@ -1,0 +1,11 @@
+".\Objects\main.obj",
+".\Objects\delay.obj",
+".\Objects\Timer0.obj",
+".\Objects\I2C.obj",
+".\Objects\AT24C02.obj",
+".\Objects\lcd1602.obj",
+".\Objects\888led.obj",
+".\Objects\Switch0000.obj" 
+TO ".\Objects\project" 
+PRINT(".\Listings\project.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 
