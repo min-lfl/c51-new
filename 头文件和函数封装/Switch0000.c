@@ -1,16 +1,37 @@
 #include <REGX52.H> //c52库
-#include <INTRINS.H> //标准变量库
 
-#include <DELAY.H>
+//定义中间变量
+unsigned char middle;
 
-unsigned char switch0000()
+
+//检测按键状态返回
+unsigned char Detection_key()
 {
 	unsigned char KeyNumber=0;
 	
-	if(P3_1==0){delay(2);while(P2_1==0);delay(2);KeyNumber=1;}
-	if(P3_0==0){delay(2);while(P2_0==0);delay(2);KeyNumber=2;}//这里其实是电路板上把k1和k2接反了
-	if(P3_2==0){delay(2);while(P2_2==0);delay(2);KeyNumber=3;}
-	if(P3_3==0){delay(2);while(P2_3==0);delay(2);KeyNumber=4;}
+	if(P3_1==0){KeyNumber=1;}
+	if(P3_0==0){KeyNumber=2;}//这里其实是电路板上把k1和k2接反了
+	if(P3_2==0){KeyNumber=3;}
+	if(P3_3==0){KeyNumber=4;}
 	
 	return KeyNumber;
+}
+
+//扫描按键状态改变全局变量（扫描间隔20ms，这次扫描结果和上次不一样时把键值写入全局变量）
+void Scan_key(){
+	static unsigned char oldnum,newnum;
+	oldnum=newnum;
+	newnum=Detection_key();
+	if(oldnum!=newnum && newnum==0){middle=oldnum;}
+}
+
+//输出后清零
+unsigned char switch0000(){
+	unsigned char tem;//中间变量
+	if(middle){
+		tem=middle;
+		middle=0;
+		return tem;
+	}
+	return tem;
 }

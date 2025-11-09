@@ -2,7 +2,7 @@
 #include <INTRINS.H> //标准变量库
 
 //标准的循环延迟
-void delay(unsigned char xms) {
+void delay(unsigned int xms) {
     unsigned char i, j;
     while (xms--) {
         i = 1;          // 中层循环次数（精确计算）
