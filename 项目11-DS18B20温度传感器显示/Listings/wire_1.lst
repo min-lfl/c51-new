@@ -1,0 +1,155 @@
+C51 COMPILER V9.54   WIRE_1                                                                11/09/2025 21:03:45 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE WIRE_1
+OBJECT MODULE PLACED IN .\Objects\wire_1.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE wire_1.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.
+                    -\Listings\wire_1.lst) TABS(2) OBJECT(.\Objects\wire_1.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <INTRINS.H> //标准变量库
+   3          
+   4          sbit DS18B20_DQ=P3^7;
+   5          
+   6          
+   7          //声明一些延迟函数，用来度量时序
+   8          void Delay500us();
+   9          void Delay120us();
+  10          void Delay60us();
+  11          void Delay30us();
+  12          void Delay10us();
+  13          
+  14            
+  15          bit init_1_wire(){
+  16   1        DS18B20_DQ=0;
+  17   1        Delay500us();   //拉低至少500us
+  18   1        DS18B20_DQ=1;   //拉高电平
+  19   1        Delay60us();    
+  20   1        Delay30us();    //等待90ms从机设备响应后
+  21   1        if(DS18B20_DQ==0){//读取电平，判断输出
+  22   2          return 0;
+  23   2        }
+  24   1        return 1;
+  25   1      }
+  26          
+  27          void write_Bit_1_wire(bit Bit){
+  28   1        if(Bit){
+  29   2          DS18B20_DQ=0;
+  30   2          Delay10us();//只拉低10微秒表示1
+  31   2          DS18B20_DQ=1;
+  32   2          Delay60us();//等待60微妙从机读取完成
+  33   2        }
+  34   1        else{
+  35   2          DS18B20_DQ=0;
+  36   2          Delay60us();    
+  37   2          Delay10us();    //拉低70ms表示0
+  38   2          DS18B20_DQ=1;
+  39   2          Delay10us();   //因为是弱上拉，我们这里等待10微妙电容充电
+  40   2        }
+  41   1      }
+  42          
+  43          
+  44          bit read_Bit_1_wire(){
+  45   1        bit date;
+  46   1        
+  47   1        DS18B20_DQ=0;
+  48   1        Delay10us();//只拉低10微秒表示读取
+  49   1        DS18B20_DQ=1;
+  50   1        
+  51   1        Delay10us();//等待20ms从机响应
+  52   1        date=DS18B20_DQ; //读取
+  53   1        Delay10us();
+  54   1        Delay30us();//等待完一个周期
+C51 COMPILER V9.54   WIRE_1                                                                11/09/2025 21:03:45 PAGE 2   
+
+  55   1        return date;
+  56   1      }
+  57          
+  58          void write_Byte_1_wire(unsigned char Byte){
+  59   1        unsigned char i;
+  60   1        Delay120us();
+  61   1        Delay120us();//等待240us把初始化的影响过滤掉
+  62   1        for(i=0;i<8;i++){
+  63   2          write_Bit_1_wire(Byte&(0x01<<i));
+  64   2        }
+  65   1      }
+  66          
+  67          unsigned char  read_Byte_1_wire(){
+  68   1        unsigned char date=0,i;
+  69   1        Delay120us();
+  70   1        Delay120us();//等待240us把初始化的影响过滤掉
+  71   1        for(i=0;i<8;i++){
+  72   2          if(read_Bit_1_wire()){date|=0x01<<i;}
+  73   2        }
+  74   1        return date;
+  75   1      }
+  76          
+  77          
+  78          
+  79          
+  80          
+  81          
+  82          
+  83          
+  84          void Delay500us()   //@11.0592MHz
+  85          {
+  86   1        unsigned char i;
+  87   1      
+  88   1        _nop_();
+  89   1        i = 227;
+  90   1        while (--i);
+  91   1      }
+  92          
+  93          void Delay120us()   //@11.0592MHz
+  94          {
+  95   1        unsigned char i;
+  96   1      
+  97   1        _nop_();
+  98   1        i = 52;
+  99   1        while (--i);
+ 100   1      }
+ 101          
+ 102          
+ 103          void Delay60us()    //@11.0592MHz
+ 104          {
+ 105   1        unsigned char i;
+ 106   1      
+ 107   1        i = 25;
+ 108   1        while (--i);
+ 109   1      }
+ 110          
+ 111          
+ 112          void Delay30us()    //@11.0592MHz
+ 113          {
+ 114   1        unsigned char i;
+ 115   1      
+ 116   1        i = 11;
+C51 COMPILER V9.54   WIRE_1                                                                11/09/2025 21:03:45 PAGE 3   
+
+ 117   1        while (--i);
+ 118   1      }
+ 119          
+ 120          
+ 121          void Delay10us()    //@11.0592MHz
+ 122          {
+ 123   1        unsigned char i;
+ 124   1      
+ 125   1        i = 2;
+ 126   1        while (--i);
+ 127   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    189    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,7 +1,9 @@
 ".\Objects\main.obj",
 ".\Objects\delay.obj",
 ".\Objects\lcd1602.obj",
-".\Objects\Timer0.obj" 
+".\Objects\Timer0.obj",
+".\Objects\DS18B20.obj",
+".\Objects\wire_1.obj" 
 TO ".\Objects\project" 
 PRINT(".\Listings\project.m51") RAMSIZE(256) 
 DISABLEWARNING (16) 

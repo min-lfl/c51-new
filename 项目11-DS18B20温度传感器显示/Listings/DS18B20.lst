@@ -1,0 +1,46 @@
+C51 COMPILER V9.54   DS18B20                                                               11/09/2025 21:03:45 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE DS18B20
+OBJECT MODULE PLACED IN .\Objects\DS18B20.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE DS18B20.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(
+                    -.\Listings\DS18B20.lst) TABS(2) OBJECT(.\Objects\DS18B20.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <INTRINS.H> //标准变量库
+   3          
+   4          #include <WIRE_1.H>
+   5          
+   6          void Start_DS18C02(){
+   7   1        init_1_wire();
+   8   1        write_Byte_1_wire(0xCC);                //跳过ROM
+   9   1        write_Byte_1_wire(0x44);    //发送开启温度变化指令
+  10   1      }
+  11          
+  12          
+  13          unsigned int Read_DS18C02(){
+  14   1        unsigned int date,Middle;
+  15   1        init_1_wire();
+  16   1        write_Byte_1_wire(0xCC);                //跳过ROM
+  17   1        write_Byte_1_wire(0xBE);    //发送开始读取指令
+  18   1        date = read_Byte_1_wire();
+  19   1        Middle = read_Byte_1_wire();
+  20   1        date|=Middle<<8;
+  21   1        return date;
+  22   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     47    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
