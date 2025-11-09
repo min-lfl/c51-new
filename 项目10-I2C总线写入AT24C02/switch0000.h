@@ -20,3 +20,18 @@ unsigned char switch0000();
 	*/
 void Scan_key();
 #endif
+
+/*定时器示例
+void Timer0_Routine() interrupt 1
+{
+	static  unsigned int T0Count;
+	TL0 = 0x18;		//设置定时初值
+	TH0 = 0xFC;		//设置定时初值
+	T0Count++;
+	if(T0Count>=20)  //20毫秒
+	{
+		T0Count=0;
+		Scan_key();
+	}
+}
+*/
