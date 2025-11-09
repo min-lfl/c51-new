@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   AT24C02                                                               11/09/2025 16:03:16 PAGE 1   
+C51 COMPILER V9.54   AT24C02                                                               11/09/2025 16:26:22 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE AT24C02
@@ -62,7 +62,7 @@ line level    source
   51   1        r_I2c();
   52   1        write_I2C(ADDRESS);//发送要读哪位
   53   1        r_I2c();
-C51 COMPILER V9.54   AT24C02                                                               11/09/2025 16:03:16 PAGE 2   
+C51 COMPILER V9.54   AT24C02                                                               11/09/2025 16:26:22 PAGE 2   
 
   54   1        
   55   1        //从这里开始读

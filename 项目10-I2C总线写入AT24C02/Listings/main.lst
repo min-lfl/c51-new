@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/09/2025 16:03:15 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/09/2025 16:26:22 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -27,90 +27,93 @@ line level    source
   17   1        Timer0Init();
   18   1      
   19   1        while(1){
-  20   2          key=switch0000();
-  21   2          if(key!=0){
-  22   3            if(key==1){
-  23   4              start=~start;//取反控制启停
-  24   4            }
-  25   3            if(key==2){// 清零
-  26   4              Min=0;
-  27   4              Sec=0;
-  28   4              Minisec=0;
-  29   4            }
-  30   3            if(key==3){
-  31   4              write_AT24C02(1,Min);
-  32   4              write_AT24C02(2,Sec);
-  33   4              write_AT24C02(3,Minisec);
-  34   4            }
-  35   3            if(key==4){
-  36   4              Min=read_AT24C02(1);
-  37   4              Sec=read_AT24C02(2);
-  38   4              Minisec=read_AT24C02(3);
-  39   4            }
-  40   3          }
-  41   2          
-  42   2          Set_888led(1,Min/10);
-  43   2          Set_888led(2,Min%10);
-  44   2          
-  45   2          Set_888led(3,11);
-  46   2          
-  47   2          Set_888led(4,Sec/10);
-  48   2          Set_888led(5,Sec%10);
+  20   2          
+  21   2          //操作判定函数
+  22   2          key=switch0000();
+  23   2          if(key!=0){
+  24   3            if(key==1){
+  25   4              start=~start;//取反控制启停
+  26   4            }
+  27   3            if(key==2){// 清零
+  28   4              Min=0;
+  29   4              Sec=0;
+  30   4              Minisec=0;
+  31   4            }
+  32   3            if(key==3){
+  33   4              write_AT24C02(1,Min);
+  34   4              write_AT24C02(2,Sec);
+  35   4              write_AT24C02(3,Minisec);
+  36   4            }
+  37   3            if(key==4){
+  38   4              Min=read_AT24C02(1);
+  39   4              Sec=read_AT24C02(2);
+  40   4              Minisec=read_AT24C02(3);
+  41   4            }
+  42   3          }
+  43   2          
+  44   2          //显示位
+  45   2          Set_888led(1,Min/10);
+  46   2          Set_888led(2,Min%10);
+  47   2          
+  48   2          Set_888led(3,11);
   49   2          
-  50   2          Set_888led(6,11);
-  51   2          
-  52   2          Set_888led(7,Minisec/10);
-  53   2          Set_888led(8,Minisec%10);
+  50   2          Set_888led(4,Sec/10);
+  51   2          Set_888led(5,Sec%10);
+  52   2          
+  53   2          Set_888led(6,11);
   54   2          
-C51 COMPILER V9.54   MAIN                                                                  11/09/2025 16:03:15 PAGE 2   
+C51 COMPILER V9.54   MAIN                                                                  11/09/2025 16:26:22 PAGE 2   
 
-  55   2        }
-  56   1      }
-  57          
-  58          //自加函数，会自动进位，执行一次自加一次
-  59          void sec_add(){
-  60   1        //停止计时控制
-  61   1        if(start){
-  62   2          Minisec++;
-  63   2          if(Minisec>=100){
-  64   3            Minisec=0;
-  65   3            Sec++;
-  66   3            if(Sec>=60){
-  67   4              Sec=0;
-  68   4              Min++;
-  69   4              if(Min>=60){
-  70   5                Min=0;
-  71   5              }
-  72   4            }
-  73   3          }
-  74   2        }
-  75   1      }
-  76          
-  77          void Timer0_Routine() interrupt 1
-  78          {
-  79   1        static  unsigned int T0Count,T0Count1,T0Count2;
-  80   1      
-  81   1        TL0 = 0x18;   //设置定时初值
-  82   1        TH0 = 0xFC;   //设置定时初值
-  83   1        T0Count++;
-  84   1        T0Count1++;
-  85   1        T0Count2++;
-  86   1        if(T0Count>=20)  //20毫秒
-  87   1        {
-  88   2          T0Count=0;
-  89   2          Scan_key();
-  90   2        }
-  91   1        if(T0Count1>=2)  //2毫秒显示一个数字，在下一个两毫秒显示下一个数字
-  92   1        {
-  93   2          T0Count1=0;
-  94   2          Scan_888led();
-  95   2        }
-  96   1        if(T0Count2>=10)  //10毫秒秒表加1
-  97   1        {
-  98   2          T0Count2=0;
-  99   2          sec_add();
- 100   2        }
- 101   1      }
+  55   2          Set_888led(7,Minisec/10);
+  56   2          Set_888led(8,Minisec%10);
+  57   2      
+  58   2        }
+  59   1      }
+  60          
+  61          //秒表自加函数，会自动进位，执行一次自加一次
+  62          void sec_add(){
+  63   1        //停止计时控制
+  64   1        if(start){
+  65   2          Minisec++;
+  66   2          if(Minisec>=100){
+  67   3            Minisec=0;
+  68   3            Sec++;
+  69   3            if(Sec>=60){
+  70   4              Sec=0;
+  71   4              Min++;
+  72   4              if(Min>=60){
+  73   5                Min=0;
+  74   5              }
+  75   4            }
+  76   3          }
+  77   2        }
+  78   1      }
+  79          
+  80          void Timer0_Routine() interrupt 1
+  81          {
+  82   1        static  unsigned int T0Count,T0Count1,T0Count2;
+  83   1      
+  84   1        TL0 = 0x18;   //设置定时初值
+  85   1        TH0 = 0xFC;   //设置定时初值
+  86   1        T0Count++;
+  87   1        T0Count1++;
+  88   1        T0Count2++;
+  89   1        if(T0Count>=20)  //20毫秒
+  90   1        {
+  91   2          T0Count=0;
+  92   2          Scan_key();
+  93   2        }
+  94   1        if(T0Count1>=2)  //2毫秒显示一个数字，在下一个两毫秒显示下一个数字
+  95   1        {
+  96   2          T0Count1=0;
+  97   2          Scan_888led();
+  98   2        }
+  99   1        if(T0Count2>=10)  //10毫秒秒表加1
+ 100   1        {
+ 101   2          T0Count2=0;
+ 102   2          sec_add();
+ 103   2        }
+ 104   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

@@ -17,6 +17,8 @@ void main(){
 	Timer0Init();
 
 	while(1){
+		
+		//操作判定函数
 		key=switch0000();
 		if(key!=0){
 			if(key==1){
@@ -39,6 +41,7 @@ void main(){
 			}
 		}
 		
+		//显示位
 		Set_888led(1,Min/10);
 		Set_888led(2,Min%10);
 		
@@ -51,11 +54,11 @@ void main(){
 		
 		Set_888led(7,Minisec/10);
 		Set_888led(8,Minisec%10);
-		
+
 	}
 }
 
-//自加函数，会自动进位，执行一次自加一次
+//秒表自加函数，会自动进位，执行一次自加一次
 void sec_add(){
 	//停止计时控制
 	if(start){

@@ -12,7 +12,7 @@ unsigned char code_888led[]={10,10,10,10,10,10,10,10};
 	*/
 unsigned char code leddata[]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x00,0x40};
 void Nixie(unsigned char Location,Number){
-	
+	P0=0x00;//消除残影（虽然不太理解）
 	switch(Location)
 	{
 		case 1: P2_2=1; P2_3=1; P2_4=1; break;
@@ -38,7 +38,7 @@ void Nixie(unsigned char Location,Number){
  */
 void Scan_888led(){
 	static unsigned char number=0,i=0;//number为自加值，i为超时判定
-	P0=0x00;//消除残影（虽然不太理解）
+	
 	
 	// 跳过不显示的位置（值为10），最多查找8次避免死循环
 	while(code_888led[number]==10 && i<8){
