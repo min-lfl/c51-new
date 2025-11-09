@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/09/2025 15:32:50 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/09/2025 16:03:15 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -19,94 +19,102 @@ line level    source
    9          #include <888led.H>
   10          
   11          
-  12          unsigned char key,i;
-  13          unsigned char h=7,m=23,date=55;
-  14          unsigned int T0Count2;
+  12          unsigned char key;
+  13          unsigned char Min,Sec,Minisec;//分，秒，毫秒
+  14          unsigned char start;
   15          
-  16          
-  17          void main(){
-  18   1        Timer0Init();
-  19   1      
-  20   1        while(1){
-  21   2          key=switch0000();
-  22   2          if(key!=0){
-  23   3            if(key==1){
-  24   4              date+=1;
-  25   4              T0Count2=0;
-  26   4            }
-  27   3            if(key==2){
-  28   4              date-=1;
-  29   4              T0Count2=0;
-  30   4            }
-  31   3            if(key==3){
-  32   4              date=3;
-  33   4            }
-  34   3            if(key==4){
-  35   4              date=4;
-  36   4            }
-  37   3          }
-  38   2          
-  39   2          
-  40   2          if(date>=60){
-  41   3            date=0;
-  42   3            m++;
-  43   3            if(m>=60){
-  44   4              m=0;
-  45   4              h++;
-  46   4              if(h>=24){
-  47   5                h=0;
-  48   5              }
-  49   4            }
-  50   3          }
-  51   2          Set_888led(1,h/10);
-  52   2          Set_888led(2,h%10);
-  53   2          
-  54   2          Set_888led(3,11);
-C51 COMPILER V9.54   MAIN                                                                  11/09/2025 15:32:50 PAGE 2   
+  16          void main(){
+  17   1        Timer0Init();
+  18   1      
+  19   1        while(1){
+  20   2          key=switch0000();
+  21   2          if(key!=0){
+  22   3            if(key==1){
+  23   4              start=~start;//取反控制启停
+  24   4            }
+  25   3            if(key==2){// 清零
+  26   4              Min=0;
+  27   4              Sec=0;
+  28   4              Minisec=0;
+  29   4            }
+  30   3            if(key==3){
+  31   4              write_AT24C02(1,Min);
+  32   4              write_AT24C02(2,Sec);
+  33   4              write_AT24C02(3,Minisec);
+  34   4            }
+  35   3            if(key==4){
+  36   4              Min=read_AT24C02(1);
+  37   4              Sec=read_AT24C02(2);
+  38   4              Minisec=read_AT24C02(3);
+  39   4            }
+  40   3          }
+  41   2          
+  42   2          Set_888led(1,Min/10);
+  43   2          Set_888led(2,Min%10);
+  44   2          
+  45   2          Set_888led(3,11);
+  46   2          
+  47   2          Set_888led(4,Sec/10);
+  48   2          Set_888led(5,Sec%10);
+  49   2          
+  50   2          Set_888led(6,11);
+  51   2          
+  52   2          Set_888led(7,Minisec/10);
+  53   2          Set_888led(8,Minisec%10);
+  54   2          
+C51 COMPILER V9.54   MAIN                                                                  11/09/2025 16:03:15 PAGE 2   
 
-  55   2          
-  56   2          Set_888led(4,m/10);
-  57   2          Set_888led(5,m%10);
-  58   2          
-  59   2          Set_888led(6,11);
-  60   2          
-  61   2          Set_888led(7,date/10);
-  62   2          Set_888led(8,date%10);
-  63   2          
-  64   2        }
-  65   1      }
-  66          
-  67          
-  68          
-  69          void Timer0_Routine() interrupt 1
-  70          {
-  71   1        static  unsigned int T0Count,T0Count1;
-  72   1      
-  73   1        TL0 = 0x18;   //设置定时初值
-  74   1        TH0 = 0xFC;   //设置定时初值
-  75   1        T0Count++;
-  76   1        T0Count1++;
-  77   1        T0Count2++;
-  78   1        if(T0Count>=20)  //20毫秒
-  79   1        {
-  80   2          T0Count=0;
-  81   2          Scan_key();
-  82   2        }
-  83   1        if(T0Count1>=2)  //2毫秒显示一个数字，在下一个两毫秒显示下一个数字
-  84   1        {
-  85   2          T0Count1=0;
-  86   2          Scan_888led();
-  87   2        }
-  88   1        if(T0Count2>=1000)  //1000毫秒秒表加1
-  89   1        {
-  90   2          T0Count2=0;
-  91   2          date++;
-  92   2        }
-  93   1      }
+  55   2        }
+  56   1      }
+  57          
+  58          //自加函数，会自动进位，执行一次自加一次
+  59          void sec_add(){
+  60   1        //停止计时控制
+  61   1        if(start){
+  62   2          Minisec++;
+  63   2          if(Minisec>=100){
+  64   3            Minisec=0;
+  65   3            Sec++;
+  66   3            if(Sec>=60){
+  67   4              Sec=0;
+  68   4              Min++;
+  69   4              if(Min>=60){
+  70   5                Min=0;
+  71   5              }
+  72   4            }
+  73   3          }
+  74   2        }
+  75   1      }
+  76          
+  77          void Timer0_Routine() interrupt 1
+  78          {
+  79   1        static  unsigned int T0Count,T0Count1,T0Count2;
+  80   1      
+  81   1        TL0 = 0x18;   //设置定时初值
+  82   1        TH0 = 0xFC;   //设置定时初值
+  83   1        T0Count++;
+  84   1        T0Count1++;
+  85   1        T0Count2++;
+  86   1        if(T0Count>=20)  //20毫秒
+  87   1        {
+  88   2          T0Count=0;
+  89   2          Scan_key();
+  90   2        }
+  91   1        if(T0Count1>=2)  //2毫秒显示一个数字，在下一个两毫秒显示下一个数字
+  92   1        {
+  93   2          T0Count1=0;
+  94   2          Scan_888led();
+  95   2        }
+  96   1        if(T0Count2>=10)  //10毫秒秒表加1
+  97   1        {
+  98   2          T0Count2=0;
+  99   2          sec_add();
+ 100   2        }
+ 101   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    338    ----
+   CODE SIZE        =    388    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
