@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/09/2025 21:03:45 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/10/2025 15:07:06 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -17,47 +17,37 @@ line level    source
    7          #include <LCD1602.H>
    8          #include <DS18B20.H>
    9          
-  10          unsigned int Time;//原始数据
-  11          unsigned char Temp_Int,Temp_Float; //温度的整数部分和小数部分
-  12          
-  13          unsigned char reverse_low_4bits(unsigned char byte) {
-  14   1          unsigned char high = byte & 0xF0;    // 保存高4位
-  15   1          unsigned char low = byte & 0x0F;     // 取低4位
-  16   1          
-  17   1          // 反转低4位：00001011 -> 低4位1011 -> 1101
-  18   1          low = ((low & 0x1) << 3) | 
-  19   1                ((low & 0x2) << 1) | 
-  20   1                ((low & 0x4) >> 1) | 
-  21   1                ((low & 0x8) >> 3);
-  22   1          
-  23   1          return high | low;  // 0000 | 1101 = 00001101
-  24   1      }
-  25          
-  26          
-  27          void main(){
-  28   1        LCD_Init();
-  29   1        
-  30   1        
-  31   1        while(1){
-  32   2          Start_DS18C02();
-  33   2          Time=Read_DS18C02();
-  34   2          Temp_Int = Time >> 4;
-  35   2          Temp_Float= reverse_low_4bits((Time << 12) >> 12);
-  36   2          LCD_ShowString(1,1,"Celsius:");
-  37   2          LCD_ShowNum(2,1,Temp_Int,2);
-  38   2          LCD_ShowString(2,3,".");
-  39   2          LCD_ShowNum(2,4,Temp_Float,2);
-  40   2          LCD_ShowString(2,6,"C");
-  41   2        }
-  42   1      }
+  10          
+  11          unsigned char Temp_Int; //温度的整数部分
+  12          unsigned int  Temp_Float;//温度的小数部分
+  13          
+  14          
+  15          void main(){
+  16   1        LCD_Init();
+  17   1        
+  18   1        
+  19   1        while(1){
+  20   2      
+  21   2          DS18C02_Handledate_read(&Temp_Int,&Temp_Float);
+  22   2          
+  23   2          LCD_ShowString(1,1,"Celsius:");
+  24   2          LCD_ShowNum(2,1,Temp_Int,2);
+  25   2          LCD_ShowString(2,3,".");
+  26   2          LCD_ShowNum(2,4,Temp_Float,4);
+  27   2          LCD_ShowString(2,8,"C");
+  28   2          
+  29   2          
+  30   2      
+  31   2        }
+  32   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    155    ----
+   CODE SIZE        =     91    ----
    CONSTANT SIZE    =     13    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      4    ----
+   DATA SIZE        =      3    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
