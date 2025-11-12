@@ -22,7 +22,7 @@ void Start_DS18C02(){
 	*/
 unsigned int Read_DS18C02(){
 	unsigned int date,Middle;
-	Start_DS18C02();
+	Start_DS18C02();//读取前更新温度
 	init_1_wire();
 	write_Byte_1_wire(0xCC);								//跳过ROM
 	write_Byte_1_wire(0xBE);   	//发送开始读取指令
@@ -32,17 +32,23 @@ unsigned int Read_DS18C02(){
 	return date;
 }
 
-///**
-//	* @brief		把4位浮点二进制（后4位补0）转化为4位整型，如1101 0000转化为8125
-//	* @param		后4位补0的二进制数小数，比如0.75的小数部分是1100 0000
-//	* @retval		输出整数，1100 0000->7500，1101 0000->8125
-//	*/
 
+/**
+	* @brief		把4位浮点二进制（后4位补0）转化为4位整型，如1101 0000转化为8125
+	* @param		后4位补0的二进制数小数，比如0.75的小数部分是1100 0000
+	* @retval		输出整数，1100 0000->7500，1101 0000->8125
+	*/
 unsigned int Floatchar_to_Decimalint(unsigned char binary) {
   unsigned long temp = (unsigned long)binary * 10000;
   return temp / 256;  
 }
 
+/**
+	* @brief		实时读取温度，最小刻度0.0625，前一个指针返回温度整数部分，后一个指针返回温度小数部分，小数部分格式为4位整数如0.8125为8125，0.75为0075
+	* @param		用来存储整数的unsigned char类型变量地址
+	* @param		用来存储小数的unsigned int类型变量地址
+	* @retval		通过指针返回
+	*/
 void DS18C02_Handledate_read(unsigned char *numint,unsigned int *numfloat){
 	unsigned int Temperature;//定义变量保存温度
 	Temperature = Read_DS18C02();
