@@ -1,0 +1,85 @@
+C51 COMPILER V9.54   MAIN                                                                  11/13/2025 22:27:35 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\L
+                    -istings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include <INTRINS.H>
+   3          
+   4          #include <LCD1602.H>
+   5          #include <DELAY.H>
+   6          #include <TIMER0.H>
+   7          #include <SWITCH0000.H>
+   8          
+   9          unsigned char Actual,Compar; //实际值和比较值
+  10          unsigned char Code;
+  11          void main(){
+  12   1        LCD_Init();
+  13   1        Timer0Init();
+  14   1        LCD_ShowString(1,1,"Speed:");
+  15   1        LCD_ShowNum(1,7,0,1);
+  16   1        while(1){
+  17   2          Code=switch0000();
+  18   2      
+  19   2          if(Code!=0){
+  20   3            if(Code==1){
+  21   4              Compar=0;
+  22   4              LCD_ShowNum(1,7,0,1);
+  23   4            }
+  24   3            if(Code==2){
+  25   4              Compar=20;
+  26   4              LCD_ShowNum(1,7,1,1);
+  27   4            }
+  28   3            if(Code==3){
+  29   4              Compar=50;
+  30   4              LCD_ShowNum(1,7,2,1);
+  31   4            }
+  32   3            if(Code==4){
+  33   4              Compar=100;
+  34   4              LCD_ShowNum(1,7,3,1);
+  35   4            }
+  36   3          }
+  37   2        }
+  38   1      }
+  39          
+  40          
+  41          void Timer0_Routine() interrupt 1
+  42          {
+  43   1        static  unsigned int T0Count;
+  44   1        TL0 = 0x9c;   //设置定时初值
+  45   1        TH0 = 0xFf;   //设置定时初值
+  46   1        Actual=(Actual+1)%100;  //循环自加
+  47   1        T0Count++;
+  48   1        if(T0Count>=200)  //20毫秒
+  49   1        {
+  50   2          T0Count=0;
+  51   2          Scan_key();
+  52   2        }
+  53   1      
+  54   1        if(Actual>=Compar){
+C51 COMPILER V9.54   MAIN                                                                  11/13/2025 22:27:35 PAGE 2   
+
+  55   2          P1_0=0;
+  56   2        }else{
+  57   2          P1_0=1;
+  58   2        }
+  59   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    245    ----
+   CONSTANT SIZE    =      7    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

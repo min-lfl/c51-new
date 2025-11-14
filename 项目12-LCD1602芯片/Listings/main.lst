@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/12/2025 21:27:26 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/13/2025 20:05:26 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -14,27 +14,76 @@ line level    source
    4          #include <DELAY.H>
    5          #include <LCD1602.H>
    6          
-   7          char str[] = "Hello, world!Hello, world!";
-   8            
-   9          void main(){
-  10   1        LCD_Init();
-  11   1        LCD_ShowChar(1,2,str);
-  12   1        while(1){
-  13   2          delay(600);
-  14   2          LCD_zuo();
-  15   2        }
-  16   1      }
+   7          #include <SWITCH0000.H>
+*** WARNING C318 IN LINE 7 OF main.c: can't open file 'SWITCH0000.H'
+   8          #include <TIMER0.H>
+*** WARNING C318 IN LINE 8 OF main.c: can't open file 'TIMER0.H'
+   9          
+  10          
+  11          #define PWM P1 
+  12          
+  13          unsigned char Speed;
+  14            
+  15          void main(){
+  16   1        unsigned char Code,i;
+  17   1        LCD_Init();
+  18   1        LCD_ShowString(1,1,"Speed:");
+*** WARNING C206 IN LINE 18 OF main.c: 'LCD_ShowString': missing function-prototype
+*** ERROR C267 IN LINE 18 OF main.c: 'LCD_ShowString': requires ANSI-style prototype
+  19   1        PWM=0x00;
+  20   1        Timer0Init();
+  21   1        while(1){
+  22   2          Code=switch0000();
+  23   2          if(Code!=0){
+  24   3            if(Code==1){
+  25   4              Speed=0;
+  26   4              LCD_ShowNum(1,7,0,1);
+  27   4            }
+  28   3            if(Code==2){
+  29   4              Speed=40;
+  30   4              LCD_ShowNum(1,7,1,1);
+  31   4            }
+  32   3            if(Code==3){
+  33   4              Speed=90;
+  34   4              LCD_ShowNum(1,7,2,1);
+  35   4            }
+  36   3            if(Code==4){
+  37   4              Speed=1000;
+  38   4              LCD_ShowNum(1,7,3,1);
+  39   4            }
+  40   3          }
+  41   2          if(Speed!=0){
+  42   3            PWM=0xff;
+  43   3            for(i=0;i<Speed;i++){
+  44   4              _nop_();
+  45   4              _nop_();
+  46   4              _nop_();
+  47   4            }
+  48   3            PWM=0x00;
+  49   3            for(i=0;i<100;i++){
+  50   4              _nop_();
+C51 COMPILER V9.54   MAIN                                                                  11/13/2025 20:05:26 PAGE 2   
 
+  51   4              _nop_();
+  52   4              _nop_();
+  53   4            }
+  54   3          }else{
+  55   3            PWM=0x00;
+  56   3          }
+  57   2        }
+  58   1      }
+  59          
+  60          void Timer0_Routine() interrupt 1
+  61          {
+  62   1        static  unsigned int T0Count;
+  63   1        TL0 = 0x18;   //设置定时初值
+  64   1        TH0 = 0xFC;   //设置定时初值
+  65   1        T0Count++;
+  66   1        if(T0Count>=20)  //20毫秒
+  67   1        {
+  68   2          T0Count=0;
+  69   2          Scan_key();
+  70   2        }
+  71   1      }
 
-MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     28    ----
-   CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =   ----    ----
-   PDATA SIZE       =   ----    ----
-   DATA SIZE        =     27    ----
-   IDATA SIZE       =   ----    ----
-   BIT SIZE         =   ----    ----
-END OF MODULE INFORMATION.
-
-
-C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  3 WARNING(S),  1 ERROR(S)

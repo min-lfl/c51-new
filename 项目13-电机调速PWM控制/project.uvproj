@@ -230,7 +230,7 @@
               <RCB>
                 <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x10000</Size>
+                <Size>0xffff</Size>
               </RCB>
               <RXB>
                 <Type>0</Type>
@@ -369,14 +369,14 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>delay.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\delay.h</FilePath>
-            </File>
-            <File>
               <FileName>delay.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>delay.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\delay.h</FilePath>
             </File>
             <File>
               <FileName>lcd1602.c</FileName>
@@ -389,24 +389,24 @@
               <FilePath>.\lcd1602.h</FilePath>
             </File>
             <File>
-              <FileName>Timer0.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\项目13-电机调速PWM控制\Timer0.h</FilePath>
-            </File>
-            <File>
               <FileName>Switch0000.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\项目13-电机调速PWM控制\Switch0000.c</FilePath>
+              <FilePath>.\Switch0000.c</FilePath>
             </File>
             <File>
               <FileName>switch0000.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\项目13-电机调速PWM控制\switch0000.h</FilePath>
+              <FilePath>.\switch0000.h</FilePath>
             </File>
             <File>
               <FileName>Timer0.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\项目13-电机调速PWM控制\Timer0.c</FilePath>
+              <FilePath>.\Timer0.c</FilePath>
+            </File>
+            <File>
+              <FileName>Timer0.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Timer0.h</FilePath>
             </File>
           </Files>
         </Group>
