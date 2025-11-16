@@ -1,0 +1,42 @@
+C51 COMPILER V9.54   MAIN                                                                  11/16/2025 20:28:16 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\L
+                    -istings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include <INTRINS.H>
+   3          
+   4          #include <LCD1602.H>
+   5          #include "IRremote.h" 
+*** WARNING C318 IN LINE 5 OF main.c: can't open file 'IRremote.h'
+   6          #include <DELAY.H>
+   7          
+   8          unsigned char key;
+   9          unsigned char last_key = 0;
+  10          
+  11          void main(){
+  12   1        LCD_Init();
+  13   1        IR_Init();
+*** WARNING C206 IN LINE 13 OF main.c: 'IR_Init': missing function-prototype
+  14   1      
+  15   1        while(1) {
+  16   2              key = IR_GetKey();
+*** WARNING C206 IN LINE 16 OF main.c: 'IR_GetKey': missing function-prototype
+  17   2      
+  18   2              if(key != 0 && key != last_key) { // 检测到新按键按下 (非重复)
+  19   3                  LCD_ShowHexNum(2,1,key,2); // 显示按键值 (如果用了LCD)
+  20   3              }
+  21   2              last_key = key; // 更新上一次按键值
+  22   2      
+  23   2              Delay_ms(20); // 主循环可以适当延时
+*** WARNING C206 IN LINE 23 OF main.c: 'Delay_ms': missing function-prototype
+*** ERROR C267 IN LINE 23 OF main.c: 'Delay_ms': requires ANSI-style prototype
+  24   2          }
+  25   1      }
+
+C51 COMPILATION COMPLETE.  4 WARNING(S),  1 ERROR(S)

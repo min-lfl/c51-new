@@ -1,0 +1,307 @@
+C51 COMPILER V9.54   XPT2046                                                               11/15/2025 01:13:18 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE XPT2046
+OBJECT MODULE PLACED IN .\Objects\XPT2046.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE XPT2046.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(
+                    -.\Listings\XPT2046.lst) TABS(2) OBJECT(.\Objects\XPT2046.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <INTRINS.H> //标准变量库
+   3          
+   4          //XPT2046引脚定义
+   5          sbit XPT2046_CS=P3^5;
+   6          sbit XPT2046_DCLK=P3^6;
+   7          sbit XPT2046_DIN=P3^4;
+   8          sbit XPT2046_DOUT=P3^7;
+   9          
+  10          #define Precision 0x00
+  11          //#define Precision 0x08 //精度开关，取消这行注释精度变为8位，值为0-255，默认为12�
+             -�精度，0-4096
+  12          
+  13          #define AIN0 0x94|Precision //引脚0，默认精度12位
+  14          #define AIN1 0xD4|Precision //引脚1，默认精度12位
+  15          #define AIN2 0xA4|Precision //引脚2，默认精度12位
+  16          #define AIN3 0xE4|Precision //引脚3，默认精度12位
+  17          
+  18          unsigned int XPT2046_Read(unsigned char Byte){
+  19   1        unsigned int num_int=0; //定义返回值
+  20   1        unsigned char i,Code; //定义i和引脚选中
+  21   1        
+  22   1        switch (Byte) {
+  23   2          case 1:           //选中引脚1
+  24   2              Code=AIN0;
+  25   2              break;
+  26   2          case 2:           //选中引脚2
+  27   2              Code=AIN1;
+  28   2              break;
+  29   2          case 3:           //选中引脚3
+  30   2              Code=AIN2;
+  31   2              break;
+  32   2          case 4:           //选中引脚4
+  33   2              Code=AIN3;
+  34   2              break;
+  35   2          default:
+  36   2              return 1;
+  37   2              break;
+  38   2      }
+  39   1        XPT2046_DCLK=0;
+  40   1        XPT2046_CS=0;
+  41   1        
+  42   1        for(i=0;i<8;i++){
+  43   2          XPT2046_DIN = (Code & (0x80 >> i)) ? 1 : 0; 
+  44   2          XPT2046_DCLK = 1; // 上升沿锁存数据
+  45   2          _nop_();
+  46   2          XPT2046_DCLK = 0;
+  47   2          _nop_();
+  48   2        }
+  49   1      //  XPT2046_DCLK=0; //拉低，准备给下降沿时接收
+  50   1      //  XPT2046_DIN=0;
+  51   1      //  XPT2046_DIN=0;
+  52   1        
+  53   1      //  for(i=6; i>0; i--);   //延时等待转换结果
+C51 COMPILER V9.54   XPT2046                                                               11/15/2025 01:13:18 PAGE 2   
+
+  54   1      //  XPT2046_DCLK = 1;   //发送一个时钟周期，清除BUSY
+  55   1      //  _nop_();
+  56   1      //  _nop_();
+  57   1      //  XPT2046_DCLK = 0;
+  58   1      //  _nop_();
+  59   1      //  _nop_();
+  60   1      //  XPT2046_DCLK = 0;
+  61   1        // 延时等待转换完成
+  62   1        for(i = 6; i > 0; i--); 
+  63   1      
+  64   1        // 清除BUSY标志并准备读取
+  65   1        XPT2046_DCLK = 1;
+  66   1        _nop_();
+  67   1        _nop_();
+  68   1        _nop_();
+  69   1        XPT2046_DCLK = 0;
+  70   1        _nop_();
+  71   1        _nop_();
+  72   1        _nop_();
+  73   1        // 正确读取12位数据（高位在先）
+  74   1        num_int = 0;
+  75   1        for(i=0;i<12;i++){
+  76   2      //    num_int <<= 1;
+  77   2      //    XPT2046_DCLK=1;
+  78   2      //    XPT2046_DCLK=0;
+  79   2      ////    if(XPT2046_DOUT){num_int=num_int|(0x8000>>i);}
+  80   2      //    num_int|= XPT2046_DOUT;
+  81   2          num_int <<= 1;         // 先将已读取的数据左移一位
+  82   2          XPT2046_DCLK = 1;
+  83   2          XPT2046_DCLK = 0;      // 下降沿后数据有效
+  84   2          if(XPT2046_DOUT) {
+  85   3              num_int |= 0x01;   // 将最低位置1
+  86   3          }
+  87   2        }
+  88   1        XPT2046_CS = 1; // 关闭芯片
+  89   1      
+  90   1        // 根据精度选择返回值
+  91   1        if(Precision & 0x08) { // 8位精度
+  92   2          return num_int+1024;     // 12位数据右移4位后得到8位数据
+  93   2        } else {               // 12位精度
+  94   2          return num_int+1024;
+  95   2        }
+  96   1      }
+  97          
+  98          
+  99          //////---包含头文件---//
+ 100          ////#include<reg52.h>
+ 101          ////#include<intrins.h>
+ 102          //////---重定义关键词---//
+ 103          ////#ifndef uchar
+ 104          ////#define uchar unsigned char
+ 105          ////#endif
+ 106          
+ 107          ////#ifndef uint
+ 108          ////#define uint  unsigned int
+ 109          ////#endif
+ 110          
+ 111          ////#ifndef ulong
+ 112          ////#define ulong  unsigned long
+ 113          ////#endif
+ 114          //////---定义使用的IO口---//
+ 115          ////sbit DOUT = P3^7;   //输出
+C51 COMPILER V9.54   XPT2046                                                               11/15/2025 01:13:18 PAGE 3   
+
+ 116          ////sbit CLK  = P3^6;   //时钟
+ 117          ////sbit DIN  = P3^4;   //输入
+ 118          ////sbit CS   = P3^5;   //片选
+ 119          
+ 120          /////****************************************************************************
+ 121          ////*函数名：SPI_Write
+ 122          ////*输  入：dat：写入数据
+ 123          ////*输  出：无
+ 124          ////*功  能：使用SPI写入数据
+ 125          ////****************************************************************************/
+ 126          
+ 127          ////void SPI_Write(uchar dat)
+ 128          ////{
+ 129          ////  uchar i;
+ 130          ////  CLK = 0;
+ 131          ////  for(i=0; i<8; i++)
+ 132          ////  {
+ 133          ////    DIN = dat >> 7;   //放置最高位
+ 134          ////    dat <<= 1;
+ 135          ////    CLK = 0;      //上升沿放置数据
+ 136          
+ 137          ////    CLK = 1;
+ 138          
+ 139          ////  }
+ 140          ////}
+ 141          /////****************************************************************************
+ 142          ////*函数名：SPI_Read
+ 143          ////*输  入：无
+ 144          ////*输  出：dat：读取 到的数据
+ 145          ////*功  能：使用SPI读取数据
+ 146          ////****************************************************************************/
+ 147          
+ 148          ////uint SPI_Read(void)
+ 149          ////{
+ 150          ////  uint i, dat=0;
+ 151          ////  CLK = 0;
+ 152          ////  for(i=0; i<12; i++)   //接收12位数据
+ 153          ////  {
+ 154          ////    dat <<= 1;
+ 155          
+ 156          ////    CLK = 1;
+ 157          ////    CLK = 0;
+ 158          
+ 159          ////    dat |= DOUT;
+ 160          
+ 161          ////  }
+ 162          ////  return dat; 
+ 163          ////}
+ 164          
+ 165          /////****************************************************************************
+ 166          ////*函数名：Read_AD_Data
+ 167          ////*输  入：cmd：读取的X或者Y
+ 168          ////*输  出：endValue：最终信号处理后返回的值
+ 169          ////*功  能：读取触摸数据
+ 170          ////****************************************************************************/
+ 171          ////unsigned int Read_AD_Data(unsigned  char cmd)
+ 172          ////{
+ 173          ////  uchar i;
+ 174          ////  uint AD_Value;
+ 175          ////  CLK = 0;
+ 176          ////  CS  = 0;
+ 177          ////  SPI_Write(cmd);
+C51 COMPILER V9.54   XPT2046                                                               11/15/2025 01:13:18 PAGE 4   
+
+ 178          ////  for(i=6; i>0; i--);   //延时等待转换结果
+ 179          ////  CLK = 1;    //发送一个时钟周期，清除BUSY
+ 180          ////  _nop_();
+ 181          ////  _nop_();
+ 182          ////  CLK = 0;
+ 183          ////  _nop_();
+ 184          ////  _nop_();
+ 185          ////  AD_Value=SPI_Read();
+ 186          ////  CS = 1;
+ 187          ////  return AD_Value;  
+ 188          ////}
+ 189          
+ 190          
+ 191          //#include <REGX52.H>
+ 192          //#include <INTRINS.H>
+ 193          
+ 194          //sbit XPT2046_CS = P3^5;
+ 195          //sbit XPT2046_DCLK = P3^6;
+ 196          //sbit XPT2046_DIN = P3^4;
+ 197          //sbit XPT2046_DOUT = P3^7;
+ 198          
+ 199          //#define Precision 0x00
+ 200          
+ 201          //#define AIN0 0x94 | Precision
+ 202          //#define AIN1 0xD4 | Precision
+ 203          //#define AIN2 0xA4 | Precision
+ 204          //#define AIN3 0xE4 | Precision
+ 205          
+ 206          //// 首先，优化SPI写入函数，用于发送命令字
+ 207          //void XPT2046_SPIWrite(unsigned char dat) {
+ 208          //    unsigned char i;
+ 209          //    XPT2046_DCLK = 0;
+ 210          //    for(i = 0; i < 8; i++) {
+ 211          //        XPT2046_DIN = dat & 0x80; // 取最高位
+ 212          //        dat <<= 1;                // 左移，准备发送下一位
+ 213          //        XPT2046_DCLK = 1;         // 上升沿发送数据
+ 214          //        XPT2046_DCLK = 0;
+ 215          //    }
+ 216          //}
+ 217          
+ 218          //// 其次，优化SPI读取函数，专门读取12位数据
+ 219          //unsigned int XPT2046_SPIRead(void) {
+ 220          //    unsigned int i, dat = 0;
+ 221          //    XPT2046_DCLK = 0;
+ 222          //    for(i = 0; i < 12; i++) { // 循环12次，读取12位有效数据
+ 223          //        dat <<= 1;            // 数据左移，为新位腾出空间
+ 224          //        XPT2046_DCLK = 1;
+ 225          //        XPT2046_DCLK = 0;     // 下降沿读取数据
+ 226          //        if(XPT2046_DOUT) {
+ 227          //            dat |= 0x01;      // 如果DOUT为高，则将最低位置1
+ 228          //        }
+ 229          //    }
+ 230          //    return dat;
+ 231          //}
+ 232          
+ 233          //// 主读取函数
+ 234          //unsigned int XPT2046_Read(unsigned char Byte) {
+ 235          //    unsigned int AD_Value = 0;
+ 236          //    unsigned char Code;
+ 237          
+ 238          //    switch (Byte) {
+ 239          //        case 1: Code = AIN0; break;
+C51 COMPILER V9.54   XPT2046                                                               11/15/2025 01:13:18 PAGE 5   
+
+ 240          //        case 2: Code = AIN1; break;
+ 241          //        case 3: Code = AIN2; break;
+ 242          //        case 4: Code = AIN3; break;
+ 243          //        default: return 0xFFFF; // 错误通道处理
+ 244          //    }
+ 245          
+ 246          //    XPT2046_DCLK = 0;
+ 247          //    XPT2046_CS = 0;  // 使能芯片
+ 248          
+ 249          //    XPT2046_SPIWrite(Code); // 发送控制命令
+ 250          
+ 251          //    // 增加的关键步骤：延时并清除BUSY状态[4](@ref)
+ 252          //    {
+ 253          //        unsigned char i;
+ 254          //        for(i=6; i>0; i--);  // 短暂延时，等待转换完成
+ 255          //        XPT2046_DCLK = 1;    // 产生一个时钟周期，清除BUSY
+ 256          //        _nop_();
+ 257          //        _nop_();
+ 258          //        XPT2046_DCLK = 0;
+ 259          //        _nop_();
+ 260          //        _nop_();
+ 261          //    }
+ 262          
+ 263          //    AD_Value = XPT2046_SPIRead(); // 读取12位AD值
+ 264          
+ 265          //    XPT2046_CS = 1; // 禁用芯片
+ 266          
+ 267          //    // 根据精度选择返回值
+ 268          //    if(Precision & 0x08) { // 8位模式
+ 269          //        return AD_Value >> 4; // 12位数据右移4位得到8位
+ 270          //    } else {                // 12位模式
+ 271          //        return AD_Value;     // 直接返回12位数据
+ 272          //    }
+ 273          //}
+*** WARNING C294 IN LINE 92 OF XPT2046.c: unreachable code
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    136    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

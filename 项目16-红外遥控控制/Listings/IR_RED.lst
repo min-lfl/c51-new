@@ -1,0 +1,341 @@
+C51 COMPILER V9.54   IR_RED                                                                11/16/2025 20:28:16 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE IR_RED
+OBJECT MODULE PLACED IN .\Objects\IR_RED.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE IR_RED.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.
+                    -\Listings\IR_RED.lst) TABS(2) OBJECT(.\Objects\IR_RED.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file    IRremote.c
+   4            * @brief   红外遥控接收模块源文件 (基于HS0038, INT1, Timer1 for AT89C52)
+   5            *          实现NEC协议解码 (适用于 11.0592MHz 晶振)
+   6            ******************************************************************************
+   7            */
+   8          
+   9          #include <reg52.h>  // <<<--- 必须包含这个！
+  10          #include "IRremote.h" // <<<--- 必须包含这个，且大小写匹配！
+*** WARNING C318 IN LINE 10 OF IR_RED.c: can't open file 'IRremote.h'
+  11          
+  12          // --- 私有宏定义 (针对NEC协议和 11.0592MHz 晶振) ---
+  13          // 机器周期 = 12 / 晶振频率 = 12 / 11.0592MHz ≈ 1.088 us
+  14          // 定时器1 每个计数值 = 1.088 us (在 11.0592MHz 下)
+  15          // 为了简化，我们仍然以 1us 为单位计算 ticks，但增加容忍度
+  16          
+  17          // NEC协议时间基准 (us) - 容忍一定误差
+  18          #define IR_TIME_TOL_PERCENT 40 // <<<--- 因为周期略大于1us，增大容忍度到40%
+  19          
+  20          #define IR_HEAD_MARK_US     9000U
+  21          #define IR_HEAD_SPACE_US    4500U
+  22          #define IR_REPEAT_HEAD_SPACE_US 2250U
+  23          #define IR_BIT_MARK_US      560U
+  24          #define IR_ONE_SPACE_US     1690U // 560 + 1125
+  25          #define IR_ZERO_SPACE_US    560U  // 560 + 560
+  26          
+  27          // 计算计数值 (仍按1us/tick估算，靠容差补偿)
+  28          #define CALC_TICKS(us) ((us) / 1) // 1MHz计数估算，1us=1tick
+  29          #define TOLERANCE(ticks) ((ticks) * IR_TIME_TOL_PERCENT / 100)
+  30          
+  31          #define IR_HEAD_MARK_TICKS          CALC_TICKS(IR_HEAD_MARK_US)
+  32          #define IR_HEAD_SPACE_TICKS         CALC_TICKS(IR_HEAD_SPACE_US)
+  33          #define IR_REPEAT_HEAD_SPACE_TICKS  CALC_TICKS(IR_REPEAT_HEAD_SPACE_US)
+  34          #define IR_BIT_MARK_TICKS           CALC_TICKS(IR_BIT_MARK_US)
+  35          #define IR_ONE_SPACE_TICKS          CALC_TICKS(IR_ONE_SPACE_US)
+  36          #define IR_ZERO_SPACE_TICKS         CALC_TICKS(IR_ZERO_SPACE_US)
+  37          
+  38          #define IR_HEAD_MARK_MAX_TICKS      (IR_HEAD_MARK_TICKS + TOLERANCE(IR_HEAD_MARK_TICKS))
+  39          #define IR_HEAD_MARK_MIN_TICKS      (IR_HEAD_MARK_TICKS - TOLERANCE(IR_HEAD_MARK_TICKS))
+  40          #define IR_HEAD_SPACE_MAX_TICKS     (IR_HEAD_SPACE_TICKS + TOLERANCE(IR_HEAD_SPACE_TICKS))
+  41          #define IR_HEAD_SPACE_MIN_TICKS     (IR_HEAD_SPACE_TICKS - TOLERANCE(IR_HEAD_SPACE_TICKS))
+  42          #define IR_REPEAT_HEAD_SPACE_MAX_TICKS (IR_REPEAT_HEAD_SPACE_TICKS + TOLERANCE(IR_REPEAT_HEAD_SPACE_TICKS)
+             -)
+  43          #define IR_REPEAT_HEAD_SPACE_MIN_TICKS (IR_REPEAT_HEAD_SPACE_TICKS - TOLERANCE(IR_REPEAT_HEAD_SPACE_TICKS)
+             -)
+  44          #define IR_BIT_MARK_MAX_TICKS       (IR_BIT_MARK_TICKS + TOLERANCE(IR_BIT_MARK_TICKS))
+  45          #define IR_BIT_MARK_MIN_TICKS       (IR_BIT_MARK_TICKS - TOLERANCE(IR_BIT_MARK_TICKS))
+  46          #define IR_ONE_SPACE_MAX_TICKS      (IR_ONE_SPACE_TICKS + TOLERANCE(IR_ONE_SPACE_TICKS))
+  47          #define IR_ONE_SPACE_MIN_TICKS      (IR_ONE_SPACE_TICKS - TOLERANCE(IR_ONE_SPACE_TICKS))
+  48          #define IR_ZERO_SPACE_MAX_TICKS     (IR_ZERO_SPACE_TICKS + TOLERANCE(IR_ZERO_SPACE_TICKS))
+  49          #define IR_ZERO_SPACE_MIN_TICKS     (IR_ZERO_SPACE_TICKS - TOLERANCE(IR_ZERO_SPACE_TICKS))
+  50          
+  51          #define IR_END_TIMEOUT_TICKS        CALC_TICKS(20000U) // 20ms超时，判断结束
+C51 COMPILER V9.54   IR_RED                                                                11/16/2025 20:28:16 PAGE 2   
+
+  52          
+  53          // 状态机定义
+  54          typedef enum {
+  55              IR_STATE_IDLE = 0,           // 空闲状态，等待引导码下降沿 (9ms Mark结束)
+  56              IR_STATE_WAIT_START_SPACE,   // 等待引导码或重复码的 Space 结束
+  57              IR_STATE_RECEIVING_BITS,     // 接收数据位状态
+  58              IR_STATE_RECEIVED_COMPLETE   // 数据接收完成状态
+  59          } IR_State_t;
+  60          
+  61          // --- 私有变量 ---
+  62          static volatile IR_State_t ir_state = IR_STATE_IDLE; // 当前解码状态
+  63          static volatile unsigned char ir_data_index = 0;     // 正在接收的数据位索引 (0-31)
+  64          static volatile unsigned long ir_raw_data = 0;       // 存储接收到的32位原始数据 (地址+~地�
+             -�+命令+~命令)
+  65          static volatile unsigned char ir_addr = 0;           // 解析出的地址码
+  66          static volatile unsigned char ir_cmd = 0;            // 解析出的命令码
+  67          static volatile unsigned char ir_last_cmd = 0;       // 上一次解析出的有效命令码 (用于重复
+             -码)
+  68          static volatile bit ir_data_valid = 0;               // 数据有效标志
+  69          static volatile bit ir_repeat_flag = 0;              // 重复码标志 (本次接收是否为重复码)
+  70          static volatile unsigned int ir_tick_count = 0;      // 定时器计数值缓存
+  71          // static volatile bit ir_timer_overflow = 0;        // <<<--- 移除这个全局 bit 变量
+  72          
+  73          // --- 新增：用于传递定时器溢出状态的全局静态变量 (避免 bit 指针) ---
+  74          static volatile bit g_timer_overflow_flag = 0;
+  75          
+  76          // --- 定时器1相关私有函数 ---
+  77          
+  78          /**
+  79           * @brief  启动定时器1计数 (模式1)
+  80           */
+  81          static void IR_Timer_Start(void) {
+  82   1          TH1 = 0;
+  83   1          TL1 = 0;
+  84   1          TF1 = 0; // 清除溢出标志
+  85   1          TR1 = 1; // 启动定时器1
+  86   1      }
+  87          
+  88          /**
+  89           * @brief  停止定时器1计数并读取当前计数值
+  90           * @return unsigned int 当前计数值 (TH1:TL1)
+  91           *         溢出状态通过全局静态变量 g_timer_overflow_flag 返回
+  92           */
+  93          static unsigned int IR_Timer_Stop_Read(void) {
+  94   1          TR1 = 0; // 停止定时器1
+  95   1          g_timer_overflow_flag = TF1; // <<<--- 读取溢出标志到全局静态变量
+  96   1          TF1 = 0; // 清除溢出标志 (重要!)
+  97   1          return (TH1 << 8) | TL1; // 返回当前计数值
+  98   1      }
+  99          
+ 100          
+ 101          // --- 外部中断1 (INT1) 服务程序 ---
+ 102          /**
+ 103           * @brief  外部中断1服务程序 (INT1 - P3.3 下降沿触发)
+ 104           *         用于捕获红外信号的下降沿，启动/停止定时器进行脉宽测量
+ 105           */
+ 106          void ExInt1_ISR(void) interrupt 2 {
+ 107   1          // static unsigned int last_tick_count = 0; // 如果需要可以保留
+ 108   1          // static bit last_timer_overflow = 0;      // 如果需要可以保留
+ 109   1      
+ 110   1          // 读取并停止定时器，获取上次下降沿以来的时间
+ 111   1          ir_tick_count = IR_Timer_Stop_Read(); // <<<--- 调用修改后的函数
+C51 COMPILER V9.54   IR_RED                                                                11/16/2025 20:28:16 PAGE 3   
+
+ 112   1          // ir_timer_overflow = g_timer_overflow_flag; // <<<--- 从全局静态变量获取溢出标志
+ 113   1          IR_Timer_Start(); // 立即重启定时器，为下次测量做准备
+ 114   1      
+ 115   1          // 状态机处理
+ 116   1          switch (ir_state) {
+ 117   2              case IR_STATE_IDLE:
+ 118   2                  // 等待 9ms Mark 结束的下降沿
+ 119   2                  TR1 = 0; // 确保定时器停止
+ 120   2                  TH1 = 0;
+ 121   2                  TL1 = 0;
+ 122   2                  TF1 = 0;
+ 123   2                  IR_Timer_Start(); // 启动定时器测量接下来的 Space
+ 124   2                  ir_state = IR_STATE_WAIT_START_SPACE; // 转移到等待Space状态
+ 125   2                  break;
+ 126   2      
+ 127   2              case IR_STATE_WAIT_START_SPACE:
+ 128   2                  // 测量的是 9ms Mark 的高电平时间
+ 129   2                  if (!g_timer_overflow_flag && // <<<--- 使用全局静态变量
+ 130   2                      (ir_tick_count >= IR_HEAD_MARK_MIN_TICKS) &&
+ 131   2                      (ir_tick_count <= IR_HEAD_MARK_MAX_TICKS)) {
+ 132   3                      // 检测到 9ms Mark，现在等待 Space 结束 (4.5ms or 2.25ms)
+ 133   3                      // 定时器已在 IR_Timer_Start 重启，现在是测量 Space 时间
+ 134   3                      // 状态不变，继续等待下一个下降沿来判断是首次还是重复
+ 135   3                  } else {
+ 136   3                      // 不符合 9ms Mark，噪声或错误，回到空闲
+ 137   3                      ir_state = IR_STATE_IDLE;
+ 138   3                      TR1 = 0;
+ 139   3                  }
+ 140   2                  break;
+ 141   2      
+ 142   2              case IR_STATE_RECEIVING_BITS:
+ 143   2                  // 测量的是 Bit Time (Mark + Space)
+ 144   2                  if (g_timer_overflow_flag) { // <<<--- 使用全局静态变量
+ 145   3                       // 时间过长，可能是结束信号或错误
+ 146   3                       // 检查是否接收完32位
+ 147   3                       if (ir_data_index == 32) {
+ 148   4                            // 可能是结束，进行校验
+ 149   4                             // 提取地址和命令
+ 150   4                              ir_addr = (ir_raw_data >> 24) & 0xFF;
+ 151   4                              // <<<--- 在 if 块内声明局部变量 ---
+ 152   4                              unsigned char addr_inv = (ir_raw_data >> 16) & 0xFF;
+*** ERROR C141 IN LINE 152 OF IR_RED.c: syntax error near 'unsigned'
+*** ERROR C202 IN LINE 152 OF IR_RED.c: 'addr_inv': undefined identifier
+ 153   4                              ir_cmd = (ir_raw_data >> 8) & 0xFF;
+ 154   4                              unsigned char cmd_inv = ir_raw_data & 0xFF;
+*** ERROR C141 IN LINE 154 OF IR_RED.c: syntax error near 'unsigned'
+*** ERROR C202 IN LINE 154 OF IR_RED.c: 'cmd_inv': undefined identifier
+ 155   4                              // <<<--- ---
+ 156   4      
+ 157   4      
+ 158   4                              if (((ir_addr ^ addr_inv) == 0xFF) && ((ir_cmd ^ cmd_inv) == 0xFF)) {
+*** ERROR C202 IN LINE 158 OF IR_RED.c: 'addr_inv': undefined identifier
+ 159   5                                  // 校验成功
+ 160   5                                  ir_data_valid = 1;
+ 161   5                                  ir_repeat_flag = 0;
+ 162   5                                  ir_last_cmd = ir_cmd; // 更新最后命令
+ 163   5                                  ir_state = IR_STATE_RECEIVED_COMPLETE;
+ 164   5                              } else {
+ 165   5                                  // 地址/命令校验失败
+ 166   5                                  ir_state = IR_STATE_IDLE;
+ 167   5                              }
+ 168   4                       } else {
+C51 COMPILER V9.54   IR_RED                                                                11/16/2025 20:28:16 PAGE 4   
+
+ 169   4                           // 未接收完就超时，错误
+ 170   4                           ir_state = IR_STATE_IDLE;
+ 171   4                       }
+ 172   3                       TR1 = 0; // 停止定时器
+ 173   3                       break;
+ 174   3                  }
+ 175   2      
+ 176   2                  if ((ir_tick_count >= IR_ZERO_SPACE_MIN_TICKS) && (ir_tick_count <= IR_ZERO_SPACE_MAX_TICKS)) 
+             -{
+ 177   3                      // 逻辑 '0'
+ 178   3                      ir_data_index++;
+ 179   3                  } else if ((ir_tick_count >= IR_ONE_SPACE_MIN_TICKS) && (ir_tick_count <= IR_ONE_SPACE_MAX_TIC
+             -KS)) {
+ 180   3                      // 逻辑 '1'
+ 181   3                      ir_raw_data |= ((unsigned long)1 << (31 - ir_data_index)); // MSB First
+ 182   3                      ir_data_index++;
+ 183   3                  } else {
+ 184   3                      // 时间不符合 0 或 1 的特征，解码错误
+ 185   3                      ir_state = IR_STATE_IDLE;
+ 186   3                      TR1 = 0;
+ 187   3                      break;
+ 188   3                  }
+ 189   2      
+ 190   2                  if (ir_data_index >= 32) {
+ 191   3                      // 32 bits received, validation happens on timeout or next edge
+ 192   3                       // Keep timer running.
+ 193   3                  }
+ 194   2                  break;
+ 195   2      
+ 196   2              case IR_STATE_RECEIVED_COMPLETE:
+ 197   2                  // 已经接收完成，这个下降沿可能是重复码的开始 (2.25ms Space 结束)
+ 198   2                  // 或者是新一帧的开始 (4.5ms Space 结束)
+ 199   2                  // 或者是结束后的噪声
+ 200   2                  if (!g_timer_overflow_flag && // <<<--- 使用全局静态变量
+ 201   2                      (ir_tick_count >= IR_REPEAT_HEAD_SPACE_MIN_TICKS) &&
+ 202   2                      (ir_tick_count <= IR_REPEAT_HEAD_SPACE_MAX_TICKS)) {
+ 203   3                      // 检测到重复码的 Space 时间 (2.25ms)
+ 204   3                      ir_repeat_flag = 1;
+ 205   3                      ir_data_valid = 1; // 使用上次的命令
+ 206   3                      // 保持在 COMPLETE 状态
+ 207   3                  } else if (!g_timer_overflow_flag && // <<<--- 使用全局静态变量
+ 208   2                             (ir_tick_count >= IR_HEAD_SPACE_MIN_TICKS) &&
+ 209   2                             (ir_tick_count <= IR_HEAD_SPACE_MAX_TICKS)) {
+ 210   3                       // 检测到新帧引导码的 Space 时间 (4.5ms)
+ 211   3                       // 准备接收新数据
+ 212   3                       ir_state = IR_STATE_RECEIVING_BITS;
+ 213   3                       ir_data_index = 0;
+ 214   3                       ir_raw_data = 0;
+ 215   3                       ir_data_valid = 0;
+ 216   3                       ir_repeat_flag = 0;
+ 217   3                       // Timer is already restarted
+ 218   3                  } else {
+ 219   3                       // 时间不符合，可能是结束或噪声，回到空闲
+ 220   3                        ir_state = IR_STATE_IDLE;
+ 221   3                        TR1 = 0;
+ 222   3                  }
+ 223   2                   break;
+ 224   2      
+ 225   2      
+ 226   2              default:
+ 227   2                  // 不应到达这里，重置状态
+ 228   2                  ir_state = IR_STATE_IDLE;
+C51 COMPILER V9.54   IR_RED                                                                11/16/2025 20:28:16 PAGE 5   
+
+ 229   2                  TR1 = 0;
+ 230   2                  break;
+ 231   2          }
+ 232   1      
+ 233   1          // last_tick_count = ir_tick_count; // 如果需要可以保留
+ 234   1          // last_timer_overflow = g_timer_overflow_flag; // 如果需要可以保留
+ 235   1      }
+ 236          
+ 237          
+ 238          // --- 公共函数实现 ---
+ 239          
+ 240          /**
+ 241           * @brief  红外遥控初始化函数
+ 242           *         配置外部中断1 (INT1/P3.3) 和 定时器1 (Timer1 Mode 1)
+ 243           */
+ 244          void IR_Init(void) {
+ 245   1          // --- 定时器1 初始化 (16位定时器模式 Mode 1) ---
+ 246   1          TMOD &= 0x0F;  // 清除T1的模式位
+ 247   1          TMOD |= 0x10;  // 设置T1为模式1 (16位定时器)
+ 248   1          TH1 = 0x00;
+ 249   1          TL1 = 0x00;
+ 250   1          TF1 = 0;       // 清除TF1
+ 251   1          TR1 = 0;       // 停止T1
+ 252   1          ET1 = 0;       // 禁用T1中断 (本例使用查询方式)
+ 253   1      
+ 254   1          // --- 外部中断1 (INT1 - P3.3) 初始化 ---
+ 255   1          IT1 = 1;  // 设置INT1为下降沿触发
+ 256   1          // IE1 = 0;  // IE1是中断标志位，由硬件管理，软件通常不需要清零
+ 257   1          PX1 = 1;  // 设置INT1为高优先级 (推荐)
+ 258   1          EX1 = 1;  // 使能INT1中断
+ 259   1      
+ 260   1          EA = 1;   // 使能全局中断
+ 261   1      
+ 262   1          // 初始化状态机变量
+ 263   1          ir_state = IR_STATE_IDLE;
+ 264   1          ir_data_index = 0;
+ 265   1          ir_raw_data = 0;
+ 266   1          ir_addr = 0;
+ 267   1          ir_cmd = 0;
+ 268   1          ir_last_cmd = 0;
+ 269   1          ir_data_valid = 0;
+ 270   1          ir_repeat_flag = 0;
+ 271   1          ir_tick_count = 0;
+ 272   1          // ir_timer_overflow = 0; // <<<--- 移除了这个变量的初始化
+ 273   1          g_timer_overflow_flag = 0; // <<<--- 初始化新增的全局静态变量
+ 274   1      }
+ 275          
+ 276          
+ 277          /**
+ 278           * @brief  获取红外遥控按键键值
+ 279           * @retval unsigned char 键值 (0x00-0xFF), 无按键时返回 0x00
+ 280           *         返回值为解码得到的命令码(Command Code)。
+ 281           *         如果是重复码，返回上一次的命令码。
+ 282           */
+ 283          unsigned char IR_GetKey(void) {
+ 284   1          unsigned char key = 0x00;
+ 285   1      
+ 286   1          // 检查是否有有效的数据
+ 287   1          if (ir_data_valid) {
+ 288   2              if (ir_repeat_flag) {
+ 289   3                  // 如果是重复码，则返回上次的有效命令
+ 290   3                  key = ir_last_cmd;
+C51 COMPILER V9.54   IR_RED                                                                11/16/2025 20:28:16 PAGE 6   
+
+ 291   3              } else {
+ 292   3                  // 如果是新数据，则返回当前命令
+ 293   3                  key = ir_cmd;
+ 294   3              }
+ 295   2              // 注意：当前实现下，一旦数据有效，GetKey会持续返回该值，
+ 296   2              // 直到状态机因超时或新帧而重置 ir_data_valid。
+ 297   2              // 如果需要“按下一次只返回一次”的效果，
+ 298   2              // 可以在这里读取后清零 ir_data_valid，
+ 299   2              // 或者由主循环在处理完按键后等待 key 变回 0。
+ 300   2              // 例如：
+ 301   2              // ir_data_valid = 0; // 读取一次后清掉 (单次触发)
+ 302   2              // 但这样会影响重复码的连续获取。
+ 303   2              // 更好的方式是在状态机中处理超时后自动清掉 ir_data_valid。
+ 304   2          }
+ 305   1      
+ 306   1          return key;
+ 307   1      }
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  5 ERROR(S)
