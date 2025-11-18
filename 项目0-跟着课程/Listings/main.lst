@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  11/03/2025 20:43:15 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  11/18/2025 10:40:04 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -10,80 +10,42 @@ line level    source
 
    1          #include <REGX52.H> //c52库
    2          #include <INTRINS.H> //标准变量库
-   3          
-   4          //定义全局变量用来存储流水灯状态
-   5          unsigned char status=0xfe;
-   6          
-   7          //标准的循环延迟（精确1ms）
-   8          void delay(unsigned char xms){
-   9   1        unsigned char i, j;
-  10   1        i = 2;
-  11   1        j = 239;
-  12   1        do{
-  13   2        do{
-  14   3          while (--j);
-  15   3        } while (--i);
-  16   2        } while (--xms);
-  17   1      }
-  18          
-  19          //流水灯，函数被执行就会正流一次
-  20          void up_down(){
-  21   1        P2=status;
-  22   1        status=_crol_(status,1);
-  23   1        delay(3);
-  24   1      }
-  25          
-  26          //倒序流水灯，函数被执行就会倒流8次
-  27          void down_up(){
-  28   1        int i;
-  29   1        for(i=0;i<8;i++){
-  30   2          P2=status;
-  31   2          status=_cror_(status,1);
-  32   2          delay(3);
-  33   2        }
-  34   1      }
-  35          
-  36          //集体亮灭，函数被执行就会亮灭5次
-  37          void Twinkle(){
-  38   1        int i;
-  39   1        for(i=0;i<5;i++){
-  40   2          P2=0x00;
-  41   2          delay(3);
-  42   2          P2=0xff;
-  43   2          delay(3);
-  44   2        }
-  45   1      }
-  46          
-  47          
-  48          void main()
-  49          {
-  50   1        EA=1;EX0=1;IT0=1;PX0=0;//中断器0的初始化，PX0=0;为优先级0
-  51   1        EA=1;EX1=1;IT1=1;PX1=1;//中断器1的初始化，PX1=1;为优先级1
-  52   1        
-  53   1        while(1){up_down();}//主循环
-  54   1      }
-C51 COMPILER V9.54   MAIN                                                                  11/03/2025 20:43:15 PAGE 2   
-
-  55          
-  56          //中断0
-  57          void int0() interrupt 0
-  58          {
-  59   1        Twinkle();
-  60   1      }
-  61          
-  62          //中断1
-  63          void int1() interrupt 2
-  64          {
-  65   1        down_up();
-  66   1      }
+   3          #include <TIMER0.H>
+   4          
+   5          void main(){
+   6   1        Timer0Init();
+   7   1        while(1){
+   8   2        }
+   9   1      }
+  10          
+  11          
+  12          void Timer0_Routine() interrupt 1
+  13          {
+  14   1        static  unsigned int T0Count,T1Count;
+  15   1        TL0 = 0x18;   //设置定时初值
+  16   1        TH0 = 0xFC;   //设置定时初值
+  17   1        T0Count++;
+  18   1        T1Count++;
+  19   1        if(T0Count>=100)  //100毫秒
+  20   1        {
+  21   2          T0Count=0;
+  22   2          P2_0=~P2_0;
+  23   2        }
+  24   1        if(T1Count>=300)  //300毫秒
+  25   1        {
+  26   2          T1Count=0;
+  27   2          P2_7=~P2_7;
+  28   2        }
+  29   1      }
+  30          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    194    ----
+   CODE SIZE        =     74    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      1    ----
+   DATA SIZE        =      4    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

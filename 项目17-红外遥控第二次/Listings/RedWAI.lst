@@ -1,0 +1,235 @@
+C51 COMPILER V9.54   REDWAI                                                                11/18/2025 11:30:08 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE REDWAI
+OBJECT MODULE PLACED IN .\Objects\RedWAI.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE RedWAI.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.
+                    -\Listings\RedWAI.lst) TABS(2) OBJECT(.\Objects\RedWAI.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <INTRINS.H> //标准变量库
+   3          
+   4          #include <LCD1602.H>
+   5          
+   6          ############################---V---定时器和中断相关函数---V-----################################
+             -#######
+*** WARNING C314 IN LINE 6 OF RedWAI.c: bad #directive syntax
+   7          void Interrupt_init();                      //初始化外部中断
+   8          void InterruptTimer2_init();                //初始化定时器
+   9          void set_InterruptTimer(unsigned int Time); //写入定时器初值
+  10          void run_InterruptTimer(unsigned char Code);//启停计时
+  11          unsigned int read_InterruptTimer();         //读取定时器计时
+  12          
+  13          ############################---V---红外相关函数---V-----############################################
+             -###
+*** WARNING C314 IN LINE 13 OF RedWAI.c: bad #directive syntax
+  14          void RedWAI_init();                         //红外初始化（执行一次就好）
+  15          void pData_init();                          //内部函数，用于准备接收下一个按键
+  16          unsigned char get_Red_Data();               //外部函数，用于输出按键值，无按键时输出0
+  17          
+  18          
+  19          ############################---V---全局变量区---V-----###############################################
+             -##
+*** WARNING C314 IN LINE 19 OF RedWAI.c: bad #directive syntax
+  20          unsigned int Time;                          //用于读取定时器时间
+  21          unsigned char Red_status=0;                 //状态码判断状态码进入某种工作模式，0为空闲，1�
+             -�等待，2为接收
+  22          
+  23          unsigned char Data[4];                      //用来存放数据，Data[0]为地址码，Data[1]为地址码反码，
+             -Data[1]为数据码，Data[3]为地址码反码
+  24          unsigned char pData=0;                      //上面数组的索引号，每接收一位加1
+  25          
+  26          unsigned char DataFlag=0;                   //数据标志位，置1说明读取到了数据，读取后清零
+  27          unsigned char restartFlag=0;                //重发标志位，收到代表检测到重发置为1，读取后清
+             -零
+  28          
+  29          ############################---V---主函数区---V-----##################################################
+             -#
+*** WARNING C314 IN LINE 29 OF RedWAI.c: bad #directive syntax
+  30          void Interrupt_Routine() interrupt 0
+  31          {
+  32   1        
+  33   1        //状态为0时
+  34   1        if(Red_status==0){
+  35   2          Red_status=1;
+  36   2          set_InterruptTimer(0x00);
+  37   2          run_InterruptTimer(1);
+  38   2        }
+  39   1        
+  40   1        
+  41   1        //状态为1时
+  42   1        else if(Red_status==1){
+  43   2          Time=read_InterruptTimer();
+C51 COMPILER V9.54   REDWAI                                                                11/18/2025 11:30:08 PAGE 2   
+
+  44   2          set_InterruptTimer(0x00);
+  45   2          
+  46   2          
+  47   2          if(Time>13000 && Time<14000){         //收到开始码，状态置1
+  48   3            Red_status=2;
+  49   3            
+  50   3            
+  51   3          }else if(Time>10750 && Time<11750){   //收到按住码，重发标志位置1
+  52   3            restartFlag=1;
+  53   3            
+  54   3            
+  55   3          }else{                                //都不是，继续回到等待状态
+  56   3            Red_status=1;
+  57   3          }
+  58   2        }
+  59   1        
+  60   1        //状态为2时
+  61   1        else if(Red_status==2){
+  62   2          //读取计时并且开始清零计时
+  63   2          Time=read_InterruptTimer();
+  64   2          set_InterruptTimer(0x00);
+  65   2          
+  66   2          //等于0时
+  67   2          if(Time>620 && Time<1520){  
+  68   3            Data[pData/8]&=~(0x01<<(pData%8));
+  69   3            pData++;
+  70   3            if(pData>=32){pData_init();}
+  71   3          }
+  72   2          
+  73   2          //等于1时
+  74   2          else if(Time>1750 && Time<2650){  
+  75   3            Data[pData/8]|=0x01<<(pData%8);
+  76   3            pData++;
+  77   3            if(pData>=32){pData_init();}
+  78   3          }
+  79   2          
+  80   2          //如果数据错误时，结束接收，进入空闲模式等待开始信号
+  81   2          else{
+  82   3            Red_status=1;
+  83   3          }
+  84   2        }
+  85   1      }
+  86          
+  87          ############################---V---红外相关函数---V-----########################################
+*** WARNING C314 IN LINE 87 OF RedWAI.c: bad #directive syntax
+  88          /**
+  89            * @brief    初始化，打开外部中断和定时器1
+  90            * @param    无
+  91            * @retval   无
+  92            */
+  93          void RedWAI_init(){
+  94   1        Interrupt_init();
+  95   1        InterruptTimer2_init();
+  96   1      }
+  97          
+  98          /**
+  99            * @brief    在索引号溢出后的操作，停止接收，状态变为0空闲，标志位置1表示接收
+             -到了数据
+ 100            * @param    无 
+ 101            * @retval   无
+ 102            */
+ 103          void pData_init(){
+C51 COMPILER V9.54   REDWAI                                                                11/18/2025 11:30:08 PAGE 3   
+
+ 104   1        pData=0;
+ 105   1        Red_status=0;
+ 106   1        set_InterruptTimer(0x00);
+ 107   1        DataFlag=1;  //数据标志位置1
+ 108   1      }
+ 109          
+ 110          /**
+ 111            * @brief    获取键值
+ 112            * @param    无
+ 113            * @retval   返回的键值
+ 114            */
+ 115          unsigned char  get_Red_Data(){  
+ 116   1        if(DataFlag){  //如果存在数据
+ 117   2          if(Data[2]==~Data[3] && Data[0]==~Data[1]){  //校验数据完整性
+ 118   3            DataFlag=0; 
+ 119   3            return Data[2];
+ 120   3          }
+ 121   2        }else{
+ 122   2          return 0;
+ 123   2        }
+ 124   1      }
+ 125          
+ 126          ############################---V---定时器和中断相关函数---V-----################################
+             -#######
+*** WARNING C314 IN LINE 126 OF RedWAI.c: bad #directive syntax
+ 127          
+ 128          /**
+ 129            * @brief    初始化外部中断1，用于接收红外下降沿
+ 130            * @param    无
+ 131            * @retval   无
+ 132            */
+ 133          void Interrupt_init(){
+ 134   1        IT0=1;        //设置为下降沿触发
+ 135   1        IE0=0;        //中断标志位
+ 136   1        EX0=1;        //打开EX0中断
+ 137   1        EA=1;         //打开总中断
+ 138   1        PX0=1;        //设置优先级高
+ 139   1      }
+ 140          
+ 141          /**
+ 142            * @brief    定时器初始化，用于计数每个下降沿的间隔判断是何信号
+ 143            * @param    无
+ 144            * @retval   无
+ 145            */
+ 146          void InterruptTimer2_init(){
+ 147   1        TMOD &= 0x0F;   //设置定时器模式
+ 148   1        TMOD |= 0x10;   //设置定时器模式
+ 149   1        TH1 = 0x00;     //设置定时初值
+ 150   1        TL1 = 0x00;     //设置定时初值
+ 151   1        TF1 = 0;        //清除TF0标志
+ 152   1        TR1 = 0;        //定时器0停止计时
+ 153   1      //  ET1=1;        //允许定时器0中断
+ 154   1      }
+ 155          /**
+ 156            * @brief    给定时器写入值，一般在开始计时时写入0
+ 157            * @param    要写入的值，0~65535
+ 158            * @retval   无
+ 159            */
+ 160          void set_InterruptTimer(unsigned int Time){
+ 161   1        TH1=Time/256;
+ 162   1        TL1=Time%256;
+ 163   1      }
+C51 COMPILER V9.54   REDWAI                                                                11/18/2025 11:30:08 PAGE 4   
+
+ 164          /**
+ 165            * @brief    用于打开停止定时器的计时
+ 166            * @param    0为停止，1为打开
+ 167            * @retval   无
+ 168            */
+ 169          void run_InterruptTimer(unsigned char Code){
+ 170   1        if(Code==1){
+ 171   2          TR1 = 1;
+ 172   2        }else{
+ 173   2          TR1 = 0;
+ 174   2        }
+ 175   1      }
+ 176          /**
+ 177            * @brief    用于取出定时器的值，一般在计时结束取出
+ 178            * @param    无
+ 179            * @retval   取出的时间值，单位us，误差0.5%
+ 180            */
+ 181          unsigned int read_InterruptTimer(){
+ 182   1        unsigned int Num=0;
+ 183   1        Num=TH1<<8|TL1;
+ 184   1        return (Num/92)*100;
+ 185   1      }
+ 186          ###############################################################################################
+*** WARNING C314 IN LINE 186 OF RedWAI.c: bad #directive syntax
+ 187          
+ 188          
+*** WARNING C291 IN LINE 124 OF RedWAI.c: not every exit path returns a value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    421    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  8 WARNING(S),  0 ERROR(S)

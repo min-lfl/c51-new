@@ -45,7 +45,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>课程</OutputName>
+          <OutputName>project</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -369,14 +369,34 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>Timer0.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Timer0.h</FilePath>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\delay.c</FilePath>
             </File>
             <File>
-              <FileName>Timer0.c</FileName>
+              <FileName>delay.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\delay.h</FilePath>
+            </File>
+            <File>
+              <FileName>lcd1602.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Timer0.c</FilePath>
+              <FilePath>.\lcd1602.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd1602.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\lcd1602.h</FilePath>
+            </File>
+            <File>
+              <FileName>RedWAI.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\RedWAI.c</FilePath>
+            </File>
+            <File>
+              <FileName>RedWAI.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\RedWAI.h</FilePath>
             </File>
           </Files>
         </Group>

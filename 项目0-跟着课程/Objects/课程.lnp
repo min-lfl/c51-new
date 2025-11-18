@@ -1,3 +1,4 @@
-".\Objects\main.obj" 
+".\Objects\main.obj",
+".\Objects\Timer0.obj" 
 TO ".\Objects\¿Î³Ì" 
 PRINT(".\Listings\¿Î³Ì.m51") RAMSIZE(256) 
