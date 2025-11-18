@@ -1,0 +1,8 @@
+".\Objects\main.obj",
+".\Objects\delay.obj",
+".\Objects\lcd1602.obj",
+".\Objects\Interrupt.obj",
+".\Objects\InterruptTimer0.obj",
+".\Objects\HCSR04.obj" 
+TO ".\Objects\projet" 
+PRINT(".\Listings\projet.m51") RAMSIZE(256) 
