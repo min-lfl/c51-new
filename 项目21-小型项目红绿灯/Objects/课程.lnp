@@ -1,0 +1,11 @@
+".\Objects\main.obj",
+".\Objects\Timer0.obj",
+".\Objects\delay.obj",
+".\Objects\Switch0000.obj",
+".\Objects\int0.obj",
+".\Objects\int1.obj",
+".\Objects\888led.obj",
+".\Objects\RGB_LED.obj" 
+TO ".\Objects\¿Î³Ì" 
+PRINT(".\Listings\¿Î³Ì.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 

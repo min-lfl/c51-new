@@ -1,0 +1,158 @@
+C51 COMPILER V9.54   RGB_LED                                                               12/15/2025 19:30:22 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE RGB_LED
+OBJECT MODULE PLACED IN .\Objects\RGB_LED.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE RGB_LED.c WARNINGLEVEL(0) OPTIMIZE(8,SPEED) BROWSE DEBUG OBJ
+                    -ECTEXTEND PRINT(.\Listings\RGB_LED.lst) OBJECT(.\Objects\RGB_LED.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          
+   3          //引用主函数变量
+   4          extern unsigned char Time;//时间计数变量
+   5          extern unsigned char Code;//红绿灯显示状态变量
+   6          extern unsigned char Pulse;//脉冲信号变量
+   7          extern unsigned char Emergency;//紧急状态标志位
+   8          
+   9          sbit South_Green_Led=P1^0;//南北绿灯
+  10          sbit South_Yellow_Led=P1^1;//南北黄灯
+  11          sbit South_Red_Led=P1^2;//南北红灯
+  12          sbit East_Green_Led=P1^3;//东西绿灯
+  13          sbit East_Yellow_Led=P1^4;//东西黄灯
+  14          sbit East_Red_Led=P1^5;//东西红灯
+  15          
+  16          //红绿灯的六种状态框架
+  17          //0-5秒南北绿灯亮,其他不亮
+  18          //5-10秒南北黄灯闪烁,其他不亮
+  19          //10-15秒南北红灯亮,其他不亮
+  20          //15-20秒东西绿灯亮,其他不亮
+  21          //20-25秒东西黄灯闪烁,其他不亮
+  22          //25-30秒东西红灯亮,其他不亮
+  23          //闪烁由周期脉冲变量Pulse控制
+  24          //状态为6时，南北红灯亮，东西红灯亮，其他不亮
+  25          //状态为7时，南北绿灯亮，东西绿灯亮，其他不亮
+  26          //状态为8时，南北黄灯亮，东西黄灯亮，其他不亮
+  27          //红绿灯状态刷新函数
+  28          void Red_Green_Light_State(unsigned char state){
+  29   1          switch(state){
+  30   2              case 0:
+  31   2                  South_Green_Led=0;
+  32   2                  South_Yellow_Led=1;
+  33   2                  South_Red_Led=1;
+  34   2                  East_Green_Led=1;
+  35   2                  East_Yellow_Led=1;
+  36   2                  East_Red_Led=1;
+  37   2                  break;
+  38   2              case 1:
+  39   2                  South_Green_Led=1;
+  40   2                  South_Yellow_Led=Pulse;
+  41   2                  South_Red_Led=1;
+  42   2                  East_Green_Led=1;
+  43   2                  East_Yellow_Led=1;
+  44   2                  East_Red_Led=1;
+  45   2                  break;
+  46   2              case 2:
+  47   2                  South_Green_Led=1;
+  48   2                  South_Yellow_Led=1;
+  49   2                  South_Red_Led=0;
+  50   2                  East_Green_Led=1;
+  51   2                  East_Yellow_Led=1;
+  52   2                  East_Red_Led=1;
+  53   2                  break;
+  54   2              case 3:
+C51 COMPILER V9.54   RGB_LED                                                               12/15/2025 19:30:22 PAGE 2   
+
+  55   2                  South_Green_Led=1;
+  56   2                  South_Yellow_Led=1;
+  57   2                  South_Red_Led=1;
+  58   2                  East_Green_Led=0;
+  59   2                  East_Yellow_Led=1;
+  60   2                  East_Red_Led=1;
+  61   2                  break;
+  62   2              case 4:
+  63   2                  South_Green_Led=1;
+  64   2                  South_Yellow_Led=1;
+  65   2                  South_Red_Led=1;
+  66   2                  East_Green_Led=1;
+  67   2                  East_Yellow_Led=Pulse;
+  68   2                  East_Red_Led=1;
+  69   2                  break;
+  70   2              case 5:
+  71   2                  South_Green_Led=1;
+  72   2                  South_Yellow_Led=1;
+  73   2                  South_Red_Led=1;
+  74   2                  East_Green_Led=1;
+  75   2                  East_Yellow_Led=1;
+  76   2                  East_Red_Led=0;
+  77   2                  break;
+  78   2              case 6:
+  79   2                  South_Green_Led=1;
+  80   2                  South_Yellow_Led=1;
+  81   2                  South_Red_Led=0;
+  82   2                  East_Green_Led=1;
+  83   2                  East_Yellow_Led=1;
+  84   2                  East_Red_Led=0;
+  85   2                  break;
+  86   2              case 7:
+  87   2                  South_Green_Led=0;
+  88   2                  South_Yellow_Led=1;
+  89   2                  South_Red_Led=1;
+  90   2                  East_Green_Led=0;
+  91   2                  East_Yellow_Led=1;
+  92   2                  East_Red_Led=1;
+  93   2                  break;
+  94   2              case 8:
+  95   2                  South_Green_Led=1;
+  96   2                  South_Yellow_Led=0;
+  97   2                  South_Red_Led=1;
+  98   2                  East_Green_Led=1;
+  99   2                  East_Yellow_Led=0;
+ 100   2                  East_Red_Led=1;
+ 101   2          }
+ 102   1      }
+ 103          
+ 104          
+ 105          //红绿灯状态机，判断当前时间处于哪个区间，设置对应状态,紧急状态除外
+ 106          void Red_Green_Light_State_Machine(unsigned char Time){
+ 107   1          if(!Emergency){
+ 108   2              if(Time<5){
+ 109   3                  Code=0;
+ 110   3              }
+ 111   2              else if(Time<10){
+ 112   3                  Code=1;
+ 113   3              }
+ 114   2              else if(Time<15){
+ 115   3                  Code=2;
+ 116   3              }
+C51 COMPILER V9.54   RGB_LED                                                               12/15/2025 19:30:22 PAGE 3   
+
+ 117   2              else if(Time<20){
+ 118   3                  Code=3;
+ 119   3              }
+ 120   2              else if(Time<25){
+ 121   3                  Code=4;
+ 122   3              }
+ 123   2              else if(Time<30){
+ 124   3                  Code=5;
+ 125   3              }
+ 126   2              else{
+ 127   3                  Time=0;//时间归零重新计时
+ 128   3              }
+ 129   2          }
+ 130   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    210    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

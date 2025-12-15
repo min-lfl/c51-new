@@ -1,0 +1,92 @@
+C51 COMPILER V9.54   888LED                                                                12/15/2025 19:30:22 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE 888LED
+OBJECT MODULE PLACED IN .\Objects\888led.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE 888led.c WARNINGLEVEL(0) OPTIMIZE(8,SPEED) BROWSE DEBUG OBJE
+                    -CTEXTEND PRINT(.\Listings\888led.lst) OBJECT(.\Objects\888led.obj)
+
+line level    source
+
+   1          #include <REGX52.H> //c52库
+   2          #include <delay.h>
+   3          
+   4          //全局变量存储2个数码管的状态，主函数里改变全局变量，扫描函数里读取全局�
+             -��量刷新到数码管
+   5          unsigned char code_888led[]={10,10};
+   6          
+   7          //共阴极数码管段码表，0~9为数字，10为空白，11为"-"
+   8          unsigned char code leddata[]={
+   9          0xc0,//0
+  10          0xf9,//1
+  11          0xa4,//2
+  12          0xb0,//3
+  13          0x99,//4
+  14          0x92,//5
+  15          0x82,//6
+  16          0xf8,//7
+  17          0x80,//8
+  18          0x90,//9
+  19          0xff, //空
+  20          ~0x40};
+  21          
+  22          /**
+  23                  * @brief                传入位置和数字，在位置上显示数字//0~9每个码代表一个数字,10代表空白
+  24                  * @param                要显示的位置，1~2
+  25                  * @param                要显示的数字0~9，10为空白
+  26                  * @retval               无
+  27                  */
+  28          void Nixie(unsigned char Location,unsigned char Number){
+  29   1              P0=0xff;//消除残影
+  30   1              switch(Location)
+  31   1              {
+  32   2                      case 1: P2_0=1; P2_1=0;  break;
+  33   2              case 2: P2_0=0; P2_1=1;  break;
+  34   2              }
+  35   1              
+  36   1              P0=leddata[Number];
+  37   1      }
+  38          
+  39          
+  40          /**
+  41           * @brief  数码管扫描显示函数
+  42           * @param  无
+  43           * @retval 无
+  44           * @note   定时器每2ms调用一次，实现多位数码管的动态显示
+  45           *         支持1~2位数码管显示
+  46           */
+  47          void Scan_888led(void){
+  48   1              static unsigned char number=0;//number为自加值，i为超时判定
+  49   1              P0=0xff;//消除残影
+  50   1              
+  51   1              Nixie((number+1),code_888led[number]);//在对应位置显示对应数据
+  52   1      
+  53   1              number = (number + 1) % 2; //更新到下一个位置，让number循环在0~1
+C51 COMPILER V9.54   888LED                                                                12/15/2025 19:30:22 PAGE 2   
+
+  54   1      }
+  55          
+  56          
+  57          /**
+  58                  * @brief                改变某个位置的数字
+  59                  * @param                要改变的位置
+  60                  * @param                要改成的数字
+  61                  * @retval               无
+  62                  */
+  63          void Set_888led(unsigned char Location,Number){
+  64   1              code_888led[(Location-1)]=Number;
+  65   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     63    ----
+   CONSTANT SIZE    =     12    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

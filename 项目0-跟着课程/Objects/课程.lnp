@@ -1,4 +1,6 @@
 ".\Objects\main.obj",
-".\Objects\Timer0.obj" 
+".\Objects\Timer0.obj",
+".\Objects\delay.obj",
+".\Objects\Switch0000.obj" 
 TO ".\Objects\¿Î³Ì" 
 PRINT(".\Listings\¿Î³Ì.m51") RAMSIZE(256) 

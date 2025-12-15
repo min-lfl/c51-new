@@ -1,0 +1,150 @@
+C51 COMPILER V9.54   MAIN                                                                  12/15/2025 19:30:22 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE main.c WARNINGLEVEL(0) OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECT
+                    -EXTEND PRINT(.\Listings\main.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include <SWITCH0000.H>
+   3          #include <DELAY.H>
+   4          #include <TIMER0.H>
+   5          #include <888LED.H>
+   6          #include <RGB_LED.H>
+   7          
+   8          unsigned char Time=0;//时间计数变量
+   9          unsigned char Code=0;//红绿灯显示状态变量
+  10          unsigned char Pulse=0;//脉冲信号变量
+  11          unsigned char Emergency=0;//紧急状态标志位
+  12          
+  13          unsigned char keynum=0;//按键变量
+  14          
+  15          
+  16          void main() {
+  17   1          //定时器初始化
+  18   1          Timer0Init();
+  19   1          //初始化外部中断0和1
+  20   1          Int0_Init();
+  21   1          Int1_Init();
+  22   1      
+  23   1          while (1)
+  24   1          {
+  25   2              //显示紧急状态
+  26   2              if(Emergency){
+  27   3                  Set_888led(1,11); // 第一个数码管显示"-"
+  28   3                  Set_888led(2,11); // 第二个数码管显示"-"
+  29   3              }
+  30   2              else{
+  31   3                  Set_888led(1,Time / 10); // 第一个数码管显示十位
+  32   3                  Set_888led(2,Time % 10); // 第二个数码管显示个位
+  33   3              }
+  34   2      
+  35   2              //红绿灯状态控制
+  36   2              Red_Green_Light_State_Machine(Time);
+  37   2              //红绿灯状态刷新LED
+  38   2              Red_Green_Light_State(Code);
+  39   2      
+  40   2              //按键扫描
+  41   2              keynum = switch0000();
+  42   2              //按键按下时状态置为8，紧急状态置为1，再次按下恢复正常状态，紧急状�
+             -��置0
+  43   2              if(keynum){
+  44   3                  if(Code == 8){
+  45   4                      Emergency = 0;
+  46   4                      Red_Green_Light_State_Machine(Time);
+  47   4                  }else{
+  48   4                      Emergency = 1;
+  49   4                      Code = 8;
+  50   4                  }
+  51   3              }
+  52   2      
+  53   2          }
+C51 COMPILER V9.54   MAIN                                                                  12/15/2025 19:30:22 PAGE 2   
+
+  54   1      }
+  55          
+  56          
+  57          //外部中断0函数，控制状态为6,紧急状态置为1，再次按下恢复正常状态，紧急状�
+             -��置0
+  58          void Int0_Routine() interrupt 0
+  59          {
+  60   1          if(Code == 6){
+  61   2              Emergency = 0;
+  62   2              Red_Green_Light_State_Machine(Time);
+  63   2          }else{
+  64   2              Emergency = 1;
+  65   2              Code = 6;
+  66   2          }
+  67   1      }
+  68          
+  69          //外部中断1函数，控制状态为7,紧急状态置为1，再次按下恢复正常状态，紧急状�
+             -��置0
+  70          void Int1_Routine() interrupt 2
+  71          {
+  72   1          if(Code == 7){
+  73   2              Emergency = 0;
+  74   2              Red_Green_Light_State_Machine(Time);
+  75   2          }else{
+  76   2              Emergency = 1;
+  77   2              Code = 7;
+  78   2          }
+  79   1      }
+  80          
+  81          
+  82          void Timer0_Routine() interrupt 1
+  83          {
+  84   1          //一个定时器复用4次
+  85   1              static  unsigned int T0Count,T0Count1,T0Count2,T0Count3;
+  86   1              TL0 = 0x18;             //设置定时初值
+  87   1              TH0 = 0xFC;             //设置定时初值
+  88   1              T0Count++;
+  89   1          T0Count1++;
+  90   1          T0Count2++;
+  91   1          T0Count3++;
+  92   1              if(T0Count>=20)  //20毫秒
+  93   1              {
+  94   2                      T0Count=0;
+  95   2                      Scan_key();
+  96   2              }
+  97   1          if(T0Count1>=2)  //2毫秒显示一个数字，在下一个两毫秒显示下一个数字
+  98   1          {
+  99   2              T0Count1=0;
+ 100   2              Scan_888led();
+ 101   2          }
+ 102   1          if(T0Count2>=780)//修正后的1秒计时，时间自加
+ 103   1          {
+ 104   2              T0Count2=0;
+ 105   2              if(!Emergency){//非紧急状态下时间自加
+ 106   3                  Time++;
+ 107   3              }
+ 108   2              if(Time>=30){//达到30秒归零
+ 109   3                  Time=0;
+ 110   3              }
+ 111   2          }
+ 112   1          if(T0Count3>=290)//修正后的300ms，脉冲信号翻转一次
+ 113   1          {
+C51 COMPILER V9.54   MAIN                                                                  12/15/2025 19:30:22 PAGE 3   
+
+ 114   2              T0Count3=0;
+ 115   2              Pulse = ~Pulse;
+ 116   2          }
+ 117   1      }
+ 118          
+ 119          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    432    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     13    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

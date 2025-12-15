@@ -1,0 +1,60 @@
+C51 COMPILER V9.54   SWITCH0000                                                            12/15/2025 19:30:22 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE SWITCH0000
+OBJECT MODULE PLACED IN .\Objects\Switch0000.obj
+COMPILER INVOKED BY: E:\Keil5 C51\Keil5 C51\C51\BIN\C51.EXE Switch0000.c WARNINGLEVEL(0) OPTIMIZE(8,SPEED) BROWSE DEBUG 
+                    -OBJECTEXTEND PRINT(.\Listings\Switch0000.lst) OBJECT(.\Objects\Switch0000.obj)
+
+line level    source
+
+   1          #include <REGX52.H> 
+   2          
+   3          //中间变量
+   4          unsigned char middle;
+   5          
+   6          
+   7          //检测按键状态返回
+   8          unsigned char Detection_key()
+   9          {
+  10   1              unsigned char KeyNumber=0;
+  11   1              
+  12   1              if(P3_4==0){KeyNumber=1;}
+  13   1              if(P3_5==0){KeyNumber=2;}
+  14   1              
+  15   1              return KeyNumber;
+  16   1      }
+  17          
+  18          //扫描按键状态改变全局变量（扫描间隔20ms，这次扫描结果和上次不一样时把键�
+             -��写入全局变量）
+  19          void Scan_key(){
+  20   1              static unsigned char oldnum,newnum;
+  21   1              oldnum=newnum;
+  22   1              newnum=Detection_key();
+  23   1              if(oldnum!=newnum && newnum==0){middle=oldnum;}
+  24   1      }
+  25          
+  26          //输出后清零
+  27          unsigned char switch0000(){
+  28   1              unsigned char tem=0;//中间变量,实现返回前清零
+  29   1              if(middle){
+  30   2                      tem=middle;
+  31   2                      middle=0;
+  32   2                      return tem;
+  33   2              }
+  34   1              return tem;
+  35   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     46    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
